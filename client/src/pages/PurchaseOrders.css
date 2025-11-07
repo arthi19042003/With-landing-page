@@ -1,0 +1,204 @@
+/* ================================
+   Purchase Orders Page Styling (Purple & White Theme)
+   ================================ */
+
+.po-container {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 20px 30px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f6ff; /* soft lavender white background */
+  min-height: auto;
+}
+
+.po-container h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #4b0082; /* deep purple title */
+  text-align: center;
+}
+
+.subtitle {
+  color: #000;
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+/* Card Wrapper */
+.po-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 4px 14px rgba(126, 34, 206, 0.12);
+  margin-bottom: 30px;
+  overflow-x: auto;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.po-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 18px rgba(126, 34, 206, 0.2);
+}
+
+/* Table Styling */
+.po-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.po-table th,
+.po-table td {
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e0e0e0;
+  vertical-align: middle;
+}
+
+.po-table th {
+  background-color: #7e22ce;
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+.po-table td {
+  text-align: center;
+}
+
+.po-table tbody tr:nth-child(even) {
+  background-color: #f9f9ff;
+}
+
+.po-table tbody tr:hover {
+  background-color: #f3e8ff;
+}
+
+/* Status badges */
+.status {
+  padding: 5px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  display: inline-block;
+  min-width: 90px;
+}
+
+.status.pending {
+  background-color: #ede9fe;
+  color: #5b21b6;
+}
+
+.status.approved {
+  background-color: #e9f5ec;
+  color: #166534;
+}
+
+.status.rejected {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+/* Buttons */
+.approve-btn,
+.reject-btn {
+  padding: 6px 12px;
+  margin-right: 8px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.approve-btn {
+  background-color: #7e22ce;
+  color: white;
+}
+
+.approve-btn:hover {
+  background-color: #6b21a8;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 6px rgba(126, 34, 206, 0.25);
+}
+
+.reject-btn {
+  background-color: #f43f5e;
+  color: white;
+}
+
+.reject-btn:hover {
+  background-color: #e11d48;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 6px rgba(240, 82, 82, 0.25);
+}
+
+/* No action text */
+.no-action {
+  color: #9ca3af;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+/* States */
+.loading,
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6b7280;
+  font-size: 1rem;
+  font-style: italic;
+}
+
+.error {
+  text-align: center;
+  padding: 15px;
+  color: #721c24;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  margin: 20px auto;
+  max-width: 800px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .po-container {
+    padding: 20px 15px;
+  }
+
+  .po-table th,
+  .po-table td {
+    padding: 10px 8px;
+    font-size: 0.85rem;
+  }
+
+  .approve-btn,
+  .reject-btn {
+    padding: 5px 10px;
+    font-size: 0.8rem;
+  }
+
+  .status {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .approve-btn,
+  .reject-btn {
+    display: inline-block;
+    margin-bottom: 5px;
+  }
+
+  .po-table td:last-child {
+    min-width: 120px;
+  }
+}
