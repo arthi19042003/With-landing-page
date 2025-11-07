@@ -45,6 +45,7 @@ const Dashboard = () => {
             <div className="dashboard-card">
               <h3>Interviews</h3>
               <p>Track your scheduled interviews and updates</p>
+              {/* This link is now correct because App.js is fixed */}
               <Link to="/interviews">
                 <button className="purple-btn">View Interviews</button>
               </Link>
@@ -66,7 +67,8 @@ const Dashboard = () => {
             <div className="dashboard-card">
               <h3>Interview Management</h3>
               <p>Schedule and review candidate interviews</p>
-              <Link to="/interviews">
+              {/* ✅ FIX: Changed link to the admin interview page */}
+              <Link to="/hiring-manager/schedule">
                 <button className="purple-btn">Manage Interviews</button>
               </Link>
             </div>
@@ -116,7 +118,8 @@ const Dashboard = () => {
             <div className="dashboard-card">
               <h3>Candidate Details</h3>
               <p>Review applicants and their interview feedback</p>
-              <Link to="/hiring-manager/candidate/1">
+              {/* ✅ FIX: Changed link to the new /candidates route */}
+              <Link to="/hiring-manager/candidates">
                 <button className="purple-btn">View Candidates</button>
               </Link>
             </div>

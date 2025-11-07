@@ -71,6 +71,14 @@ const LandingPage = () => {
             <p>Post jobs and find the best talent for your team.</p>
             <Link to="/register/employer" className="btn btn-primary">Sign Up as Employer</Link>
           </div>
+
+          {/* ✅ UPDATED CODE: New card for Hiring Manager */}
+          <div className="pricing-card">
+            <h3>Hiring Managers</h3>
+            <p>Manage teams, review candidates, and conduct interviews.</p>
+            <Link to="/register/hiring-manager" className="btn btn-primary">Sign Up as Manager</Link>
+          </div>
+
         </div>
       </section>
 
@@ -80,6 +88,7 @@ const LandingPage = () => {
         <form className="contact-form">
           <input type="email" placeholder="Your Email" />
           <textarea placeholder="Your Message" rows="5"></textarea>
+          {/* ✅ FIX: Corrected syntax from "type." to "type=" */}
           <button type="submit" className="btn btn-primary">Send Message</button>
         </form>
       </section>

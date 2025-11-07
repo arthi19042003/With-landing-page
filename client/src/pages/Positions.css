@@ -38,7 +38,8 @@
 /* ===== Grid Layout ===== */
 .positions-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  /* ✅ This is the correct rule */
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
   gap: 25px;
 }
 
@@ -116,6 +117,13 @@
 }
 
 /* ===== Responsive ===== */
+@media (max-width: 900px) {
+  /* Make grid single-column on smaller screens */
+  .positions-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 768px) {
   .positions-container {
     padding: 20px;

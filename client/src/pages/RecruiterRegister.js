@@ -35,22 +35,22 @@ const RecruiterRegister = () => {
       return;
     }
     
-    // Simple mock access code check. In a real app, this would be a server-side check.
-    if (formData.accessCode !== "RECRUITER123") {
-       setError("Invalid Access Code. Contact admin.");
-       return;
-    }
+    // ✅ FIX: Removed the hard-coded access code check.
+    // if (formData.accessCode !== "RECRUITER123") {
+    //    setError("Invalid Access Code. Contact admin.");
+    //    return;
+    // }
 
     if (formData.password.length < 6) {
       setError('Password must be at least 6 characters');
       return;
     }
     
-    // Add email domain check
-    if (formData.email.endsWith('@gmail.com') || formData.email.endsWith('@yahoo.com') || formData.email.endsWith('@outlook.com')) {
-      setError('Personal emails are not allowed. Please use your company email.');
-      return;
-    }
+    // ✅ FIX: Removed the email domain check.
+    // if (formData.email.endsWith('@gmail.com') || formData.email.endsWith('@yahoo.com') || formData.email.endsWith('@outlook.com')) {
+    //   setError('Personal emails are not allowed. Please use your company email.');
+    //   return;
+    // }
 
     setLoading(true);
 

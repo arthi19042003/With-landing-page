@@ -22,23 +22,26 @@ import RecruiterRegister from "./pages/RecruiterRegister";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import ResumeUpload from "./pages/ResumeUpload";
-import InterviewDetails from "./pages/InterviewDetails";
+// ✅ FIX: Import the candidate's interview list
+import CandidateInterviewList from "./pages/Interviews"; 
 
 // ==================== Employer Pages ====================
 import EmployerDashboard from "./pages/Dashboard"; 
 import EmployerProfile from "./pages/EmployerProfile";
-import CreatePosition from "./pages/CreatePosition"; // ✅ NEW
+import CreatePosition from "./pages/CreatePosition"; 
 
 // ==================== Recruiter Pages ====================
 import RecruiterProfile from "./pages/RecruiterProfile"; 
-import SubmitCandidate from "./pages/SubmitCandidate"; // ✅ NEW
+import SubmitCandidate from "./pages/SubmitCandidate"; 
 
 // ==================== Hiring Manager Pages ====================
 import HiringManagerDashboard from "./pages/HiringDashboard"; 
 import Inbox from "./pages/Inbox";
 import OpenPositions from "./pages/Positions"; 
-import CandidateDetails from "./pages/Candidates"; 
-import ScheduleInterview from "./pages/InterviewDetails"; 
+// ✅ FIX: Import the candidate list page
+import CandidateListPage from "./pages/Candidates"; 
+// ✅ FIX: Renamed import for clarity, this is the admin page
+import InterviewManagementPage from "./pages/InterviewDetails"; 
 import Onboarding from "./pages/Onboarding"; 
 import HiringReports from "./pages/PurchaseOrders"; 
 
@@ -104,11 +107,12 @@ function App() {
                 </PrivateRoute>
               }
             />
+            {/* ✅ FIX: This route now correctly points to the candidate's list */}
             <Route
               path="/interviews"
               element={
                 <PrivateRoute>
-                  <InterviewDetails />
+                  <CandidateInterviewList />
                 </PrivateRoute>
               }
             />
@@ -183,19 +187,21 @@ function App() {
                 </PrivateRoute>
               }
             />
+            {/* ✅ FIX: Changed route to /candidates (plural) and pointing to the list page */}
             <Route
-              path="/hiring-manager/candidate/:id"
+              path="/hiring-manager/candidates"
               element={
                 <PrivateRoute>
-                  <CandidateDetails />
+                  <CandidateListPage />
                 </PrivateRoute>
               }
             />
+            {/* ✅ FIX: This is the correct route for managing interviews */}
             <Route
               path="/hiring-manager/schedule"
               element={
                 <PrivateRoute>
-                  <ScheduleInterview />
+                  <InterviewManagementPage />
                 </PrivateRoute>
               }
             />
