@@ -1,75 +1,121 @@
 // client/src/pages/Positions.js
-import React, { useEffect, useState } from "react";
-import api from '../api/axios'; // Import the configured axios instance
+import React, { useEffect, useState, useMemo } from "react";
+import { Link } from 'react-router-dom'; // ✅ NEW: Import Link
+import api from '../api/axios';
 import "./Positions.css";
 
 const Positions = () => {
+  // ... (all existing state and functions remain the same)
   const [positions, setPositions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [filters, setFilters] = useState({
+    project: '',
+    department: '',
+    skills: ''
+  });
+
+  const { departments, projects } = useMemo(() => {
+    const allDepartments = new Set();
+    const allProjects = new Set();
+    positions.forEach(pos => {
+      if (pos.department) allDepartments.add(pos.department);
+      if (pos.project) allProjects.add(pos.project);
+    });
+    return {
+      departments: Array.from(allDepartments).sort(),
+      projects: Array.from(allProjects).sort()
+    };
+  }, [positions]);
 
   useEffect(() => {
     const fetchPositions = async () => {
       setLoading(true);
       setError('');
+      
+      const params = new URLSearchParams();
+      if (filters.project) params.append('project', filters.project);
+      if (filters.department) params.append('department', filters.department);
+      if (filters.skills) params.append('skills', filters.skills);
+
       try {
-        const response = await api.get("/positions"); // Fetch from API
+        // ✅ UPDATED: Use the /positions route, not /hiringManager/positions
+        const response = await api.get("/positions", { params }); 
         setPositions(response.data);
       } catch (err) {
         console.error("Error fetching positions:", err);
         setError("Failed to load positions. Please try again later.");
-        setPositions([]); // Clear data on error
+        setPositions([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchPositions();
-  }, []); // Empty dependency array means this runs once on mount
+  }, [filters]); 
 
-  // --- Helper function to get status class ---
-  const getStatusClass = (status) => {
-    if (!status) return 'open'; // Default to open if status is missing
-    return status.toLowerCase() === 'closed' ? 'closed' : 'open';
+  const handleFilterChange = (e) => {
+    setFilters(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
   };
 
-  if (loading) {
-    return <div className="positions-container"><p className="empty">Loading positions...</p></div>;
-  }
-
-  if (error) {
-     return <div className="positions-container"><p className="error">{error}</p></div>; // Display error message
-  }
+  const getStatusClass = (status) => {
+    if (!status) return 'open';
+    return status.toLowerCase() === 'closed' ? 'closed' : 'open';
+  };
 
   return (
     <div className="positions-container">
       <h2>Open Positions</h2>
       <p className="subtitle">Manage and view your organization’s job openings</p>
 
-      {positions.length === 0 ? (
-        <p className="empty">No positions found.</p>
-      ) : (
+      {/* --- Filter Section --- */}
+      <div className="filter-grid">
+        <select name="department" value={filters.department} onChange={handleFilterChange}>
+          <option value="">All Departments</option>
+          {departments.map(d => <option key={d} value={d}>{d}</option>)}
+        </select>
+        <select name="project" value={filters.project} onChange={handleFilterChange}>
+          <option value="">All Projects</option>
+          {projects.map(p => <option key={p} value={p}>{p}</option>)}
+        </select>
+        <input
+          type="text"
+          name="skills"
+          placeholder="Filter by skill (e.g., React)"
+          value={filters.skills}
+          onChange={handleFilterChange}
+        />
+      </div>
+
+      {loading && <p className="empty">Loading positions...</p>}
+      {error && <p className="error">{error}</p>}
+
+      {!loading && !error && positions.length === 0 && (
+        <p className="empty">No positions found matching your criteria.</p>
+      )}
+
+      {!loading && !error && positions.length > 0 && (
         <div className="positions-grid">
           {positions.map((pos) => (
-            // Use _id from MongoDB as key
-            <div
+            // ✅ UPDATED: Wrap card in a Link to the new details page
+            <Link 
               key={pos._id}
+              to={`/hiring-manager/position/${pos._id}`} 
               className={`position-card ${getStatusClass(pos.status)}`}
             >
               <div className="card-header">
-                {/* Use title from API data */}
                 <h3>{pos.title || 'Untitled Position'}</h3>
-                {/* Use status from API data */}
                 <span
                   className={`status-tag ${
                     getStatusClass(pos.status) === "open" ? "status-open" : "status-closed"
                   }`}
                 >
-                  {/* Display status, default to 'Open' */}
                   {pos.status || 'Open'}
                 </span>
               </div>
-              {/* Use fields from the Position model */}
               <p>
                 <strong>Department:</strong> {pos.department || 'N/A'}
               </p>
@@ -78,16 +124,12 @@ const Positions = () => {
               </p>
               <p>
                 <strong>Skills:</strong>
-                {/* Check if skills array exists and join, otherwise show N/A */}
                 {Array.isArray(pos.skills) && pos.skills.length > 0
                   ? pos.skills.join(", ")
                   : 'N/A'}
               </p>
-               {/* Display description if available */}
                {pos.description && <p><strong>Description:</strong> {pos.description}</p>}
-               {/* Openings field is not in the Position model, so removed */}
-               {/* <p><strong>Openings:</strong> {pos.openings}</p> */}
-            </div>
+            </Link>
           ))}
         </div>
       )}

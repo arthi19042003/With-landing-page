@@ -22,8 +22,7 @@ import RecruiterRegister from "./pages/RecruiterRegister";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import ResumeUpload from "./pages/ResumeUpload";
-// ✅ FIX: Import the candidate's interview list
-import CandidateInterviewList from "./pages/Interviews"; 
+import CandidateInterviewList from "./pages/Interviews"; // This is the candidate's view
 
 // ==================== Employer Pages ====================
 import EmployerDashboard from "./pages/Dashboard"; 
@@ -38,12 +37,14 @@ import SubmitCandidate from "./pages/SubmitCandidate";
 import HiringManagerDashboard from "./pages/HiringDashboard"; 
 import Inbox from "./pages/Inbox";
 import OpenPositions from "./pages/Positions"; 
-// ✅ FIX: Import the candidate list page
-import CandidateListPage from "./pages/Candidates"; 
-// ✅ FIX: Renamed import for clarity, this is the admin page
+import CandidateListPage from "./pages/CandidateList";
 import InterviewManagementPage from "./pages/InterviewDetails"; 
 import Onboarding from "./pages/Onboarding"; 
-import HiringReports from "./pages/PurchaseOrders"; 
+import HiringReports from "./pages/PurchaseOrders"; // This page doubles as PO page
+
+// ✅ NEW: Import the new pages
+import CandidateHistory from "./pages/CandidateHistory";
+import PositionDetails from "./pages/PositionDetails";
 
 // ==================== Role-Based Dashboard Redirect ====================
 function RoleBasedDashboard() {
@@ -53,7 +54,7 @@ function RoleBasedDashboard() {
   const role = (user.role || user.userType || "").toLowerCase();
 
   if (role === "employer") return <Navigate to="/employer/dashboard" />;
-  if (role === "recruiter") return <Navigate to="/dashboard" />; // Recruiters use a dashboard too
+  if (role === "recruiter") return <Navigate to="/dashboard" />;
   if (role === "hiringmanager") return <Navigate to="/hiring-manager/dashboard" />;
   
   return <Dashboard />; // candidate default
@@ -90,6 +91,8 @@ function App() {
               }
             />
 
+            {/* ... (Candidate, Employer, Recruiter routes remain the same) ... */}
+            
             {/* ==================== Candidate Routes ==================== */}
             <Route
               path="/profile"
@@ -107,7 +110,6 @@ function App() {
                 </PrivateRoute>
               }
             />
-            {/* ✅ FIX: This route now correctly points to the candidate's list */}
             <Route
               path="/interviews"
               element={
@@ -162,6 +164,7 @@ function App() {
               }
             />
 
+
             {/* ==================== Hiring Manager Routes ==================== */}
             <Route
               path="/hiring-manager/dashboard"
@@ -187,7 +190,6 @@ function App() {
                 </PrivateRoute>
               }
             />
-            {/* ✅ FIX: Changed route to /candidates (plural) and pointing to the list page */}
             <Route
               path="/hiring-manager/candidates"
               element={
@@ -196,7 +198,27 @@ function App() {
                 </PrivateRoute>
               }
             />
-            {/* ✅ FIX: This is the correct route for managing interviews */}
+            
+            {/* ✅ NEW: Route for single candidate history */}
+            <Route
+              path="/hiring-manager/candidate/:id"
+              element={
+                <PrivateRoute>
+                  <CandidateHistory />
+                </PrivateRoute>
+              }
+            />
+            
+            {/* ✅ NEW: Route for single position details */}
+            <Route
+              path="/hiring-manager/position/:id"
+              element={
+                <PrivateRoute>
+                  <PositionDetails />
+                </PrivateRoute>
+              }
+            />
+
             <Route
               path="/hiring-manager/schedule"
               element={

@@ -33,7 +33,11 @@ const CandidateSchema = new mongoose.Schema({
   linkedinProfile: { type: String, default: '' },
   
   // Link to the user who submitted this candidate (if submitted by a recruiter)
-  submittedByRecruiter: { type: mongoose.Schema.Types.ObjectId, ref: "User" }
+  submittedByRecruiter: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+
+  // --- ✅ NEW: Fields for Feature 1: View Resume ---
+  resumePath: { type: String, default: '' },
+  resumeOriginalName: { type: String, default: '' }
 
 });
 

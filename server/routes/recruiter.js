@@ -7,12 +7,30 @@ const Submission = require("../models/Submission");
 const User = require("../models/User");
 const Message = require("../models/Message");
 
+// ✅ NEW: Import multer and file system utils
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
+
+// ✅ NEW: Setup multer for resume uploads
+const resumeStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = 'uploads/recruiter_resumes';
+    fs.mkdirSync(uploadDir, { recursive: true }); // Create dir if not exists
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => cb(null, Date.now() + "-" + path.extname(file.originalname)),
+});
+const resumeUpload = multer({ storage: resumeStorage });
+
 // ====================================================
 // @route   POST /api/recruiter/submit
 // @desc    Recruiter submits a candidate for a position
 // @access  Protected (Recruiter)
+//
+// ✅ UPDATED: Now uses resumeUpload.single('resume')
 // ====================================================
-router.post("/submit", auth, async (req, res) => {
+router.post("/submit", auth, resumeUpload.single('resume'), async (req, res) => {
   try {
     const {
       firstName,
@@ -25,12 +43,17 @@ router.post("/submit", auth, async (req, res) => {
       skypeId,
       githubProfile,
       linkedinProfile,
-      positionId, // The ID of the position they are being submitted for
-      hiringManagerId, // The ID of the manager to notify
+      positionId, 
+      hiringManagerId,
     } = req.body;
 
     if (!email || !positionId || !firstName || !hiringManagerId) {
       return res.status(400).json({ message: "First Name, Email, Position, and Hiring Manager are required." });
+    }
+    
+    // ✅ NEW: Check for file
+    if (!req.file) {
+      return res.status(400).json({ message: "A resume file is required for submission." });
     }
 
     // 1. Find or create the candidate
@@ -48,7 +71,9 @@ router.post("/submit", auth, async (req, res) => {
         githubProfile,
         linkedinProfile,
         status: "Submitted",
-        submittedByRecruiter: req.userId, // Link to the recruiter
+        submittedByRecruiter: req.userId,
+        resumePath: req.file.path, // ✅ NEW
+        resumeOriginalName: req.file.originalname, // ✅ NEW
       });
     } else {
       // If candidate exists, update their info
@@ -64,11 +89,13 @@ router.post("/submit", auth, async (req, res) => {
         linkedinProfile,
         status: "Submitted", // Reset status for new submission
         submittedByRecruiter: req.userId,
+        resumePath: req.file.path, // ✅ NEW
+        resumeOriginalName: req.file.originalname, // ✅ NEW
       });
     }
     await candidate.save();
 
-    // 2. Check for duplicate submission (same candidate for same position)
+    // 2. Check for duplicate submission
     const existingSubmission = await Submission.findOne({
       candidate: candidate._id,
       position: positionId,
@@ -82,12 +109,13 @@ router.post("/submit", auth, async (req, res) => {
     const submission = new Submission({
       candidate: candidate._id,
       position: positionId,
-      submittedBy: req.userId, // The Recruiter's User ID
+      submittedBy: req.userId,
       status: "submitted",
     });
     await submission.save();
 
     // 4. Send a message to the Hiring Manager's Inbox
+    // ... (existing message logic) ...
     const manager = await User.findById(hiringManagerId);
     if (manager) {
       const recruiter = await User.findById(req.userId);
@@ -111,12 +139,15 @@ router.post("/submit", auth, async (req, res) => {
 
 // ====================================================
 // @route   GET /api/recruiter/managers
-// @desc    Get all hiring managers for submission form
+// @desc    Get all hiring managers AND RECRUITERS
 // @access  Protected (Recruiter)
 // ====================================================
 router.get("/managers", auth, async (req, res) => {
     try {
-        const managers = await User.find({ role: 'hiringManager' }).select('profile.firstName profile.lastName email');
+        // ✅ UPDATED: Find managers OR recruiters
+        const managers = await User.find({ 
+          role: { $in: ['hiringManager', 'recruiter'] } 
+        }).select('profile.firstName profile.lastName profile.agencyName email role');
         res.json(managers);
     } catch (error) {
         console.error("Error fetching managers:", error.message);

@@ -1,111 +1,74 @@
-import React, { useState, useEffect } from "react";
-import "./HiringDashboard.css";
+// client/src/pages/HiringDashboard.js
+import React from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import "./Dashboard.css"; // Re-use the existing Dashboard CSS for styling
 
-const HiringDashboard = () => {
-  const [filter, setFilter] = useState("");
-  const [stats, setStats] = useState([]);
-  const [submissions, setSubmissions] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // === Fetch dashboard data ===
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [summaryRes, submissionsRes] = await Promise.all([
-          fetch("http://localhost:5000/api/dashboard/summary", {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-          }),
-          fetch("http://localhost:5000/api/dashboard/submissions", {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-          }),
-        ]);
-
-
-        const summary = await summaryRes.json();
-        const subs = await submissionsRes.json();
-
-        setStats([
-          { title: "Total Submissions", value: summary.total || 0 },
-          { title: "Shortlisted", value: summary.shortlisted || 0 },
-          { title: "Hired", value: summary.hired || 0 },
-        ]);
-        setSubmissions(subs.data || []);
-      } catch (err) {
-        console.error("Dashboard fetch error:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
-
-  const filtered = submissions.filter((s) =>
-    `${s.firstName} ${s.lastName}`.toLowerCase().includes(filter.toLowerCase()) ||
-    (s.position || "").toLowerCase().includes(filter.toLowerCase()) ||
-    (s.status || "").toLowerCase().includes(filter.toLowerCase())
-  );
-
-  if (loading) return <div className="hiring-dashboard"><p>Loading dashboard...</p></div>;
+const HiringManagerDashboard = () => {
+  const { user } = useAuth();
 
   return (
-    <div className="hiring-dashboard">
-      <h2>Hiring Manager Dashboard</h2>
+    <div className="dashboard-container">
+      <h2 className="dashboard-title">
+        Welcome, {user?.profile?.firstName || 'Manager'}
+      </h2>
 
-      {/* === Stats Section === */}
-      <div className="stats-grid">
-        {stats.map((stat, i) => (
-          <div key={i} className="stat-card">
-            <h3>{stat.value}</h3>
-            <p>{stat.title}</p>
-          </div>
-        ))}
-      </div>
+      <p className="dashboard-subtitle">
+        Manage positions, candidates, and hiring operations
+      </p>
 
-      {/* === Filter/Search === */}
-      <div className="filter-bar">
-        <input
-          type="text"
-          placeholder="Search candidate, position, or status..."
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-        />
-      </div>
+      <div className="dashboard-grid">
+        {/* --- New Navigation Cards --- */}
+        <div className="dashboard-card">
+          <h3>Inbox</h3>
+          <p>View messages and candidate communications</p>
+          <Link to="/hiring-manager/inbox">
+            <button className="purple-btn">Open Inbox</button>
+          </Link>
+        </div>
 
-      {/* === Recent Submissions Table === */}
-      <div className="recent-submissions">
-        <h3>Recent Candidate Submissions</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Candidate</th>
-              <th>Position</th>
-              <th>Status</th>
-              <th>Date Submitted</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((row, i) => (
-              <tr key={i}>
-                <td>{row.firstName} {row.lastName}</td>
-                <td>{row.position || "-"}</td>
-                <td className={`status ${row.status?.toLowerCase().replace(" ", "-")}`}>
-                  {row.status}
-                </td>
-                <td>{new Date(row.createdAt).toLocaleDateString()}</td>
-              </tr>
-            ))}
-            {filtered.length === 0 && (
-              <tr>
-                <td colSpan="4" style={{ textAlign: "center", padding: "10px" }}>
-                  No candidates found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        <div className="dashboard-card">
+          <h3>Open Positions</h3>
+          <p>View, filter, and manage current job openings</p>
+          <Link to="/hiring-manager/open-positions">
+            <button className="purple-btn">View Positions</button>
+          </Link>
+        </div>
+
+        <div className="dashboard-card">
+          <h3>All Candidates</h3>
+          <p>Review applicants and their submission history</p>
+          <Link to="/hiring-manager/candidates">
+            <button className="purple-btn">View Candidates</button>
+          </Link>
+        </div>
+
+        <div className="dashboard-card">
+          <h3>Schedule Interviews</h3>
+          <p>Plan and organize interviews with candidates</p>
+          <Link to="/hiring-manager/schedule">
+            <button className="purple-btn">Manage Schedule</button>
+          </Link>
+        </div>
+
+        <div className="dashboard-card">
+          <h3>Onboarding</h3>
+          <p>Track new hires and their onboarding status</p>
+          <Link to="/hiring-manager/onboarding">
+            <button className="purple-btn">View Onboarding</button>
+          </Link>
+        </div>
+
+        <div className="dashboard-card">
+          <h3>Purchase Orders</h3>
+          <p>Generate new POs and view past reports</p>
+          <Link to="/hiring-manager/reports">
+            <button className="purple-btn">View POs</button>
+          </Link>
+        </div>
       </div>
     </div>
   );
 };
 
-export default HiringDashboard;
+export default HiringManagerDashboard;
