@@ -5,8 +5,9 @@
   align-items: center;
   width: 100%;
   flex-grow: 1; /* Take up remaining vertical space */
-  padding: 20px;
+  padding: 110px 20px 20px 20px; /* ✅ MODIFIED: Added 110px top padding */
   min-height: 90vh; /* Ensure it takes height */
+  box-sizing: border-box; /* ✅ ADDED: Ensures padding is included in height */
 }
 
 /* ❌ REMOVED .login-page-bg (which had login-bg.png) */
@@ -107,7 +108,7 @@ p {
 /* ✅ Responsive Fix */
 @media (max-width: 900px) {
   .auth-page-container {
-    padding: 20px;
+    padding: 110px 20px 20px 20px; /* ✅ MODIFIED: Kept top padding */
   }
 
   .auth-card {

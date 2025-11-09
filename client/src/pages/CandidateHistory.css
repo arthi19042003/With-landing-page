@@ -1,7 +1,7 @@
 /* client/src/pages/CandidateHistory.css */
 .history-container {
   max-width: 1000px;
-  margin: 60px auto;
+  margin: 110px auto 60px auto; /* ✅ MODIFIED: Increased top margin */
   padding: 40px 50px;
   font-family: "Inter", sans-serif;
   background-color: #faf5ff;

@@ -4,9 +4,10 @@
   width: 100%;
   /* ✅ FIX: Removed background image */
   background-color: transparent; 
-  padding: 90px 20px 40px;
+  padding: 110px 20px 40px; /* ✅ MODIFIED: Increased top padding */
   display: flex;
   justify-content: center;
+  box-sizing: border-box; /* ✅ ADDED */
 }
 
 /* Profile Content Box */

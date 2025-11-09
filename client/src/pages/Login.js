@@ -48,7 +48,8 @@ const Login = () => {
     <div className="auth-page-container"> 
       {/* ✅ FIX 3: Use the auth-card class for consistent styling */}
       <div className="auth-card"> 
-        <h2>Login</h2>
+        {/* ✅ MODIFICATION: Title changed */}
+        <h2>Candidate Login</h2>
 
         {/* This displays the message from registration */}
         {message && (

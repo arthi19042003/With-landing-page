@@ -1,3 +1,4 @@
+// client/src/pages/EmployerRegister.js
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -57,9 +58,11 @@ const EmployerRegister = () => {
     setLoading(false);
 
     if (result.success) {
-      // ✅ FIX: Log the user out and redirect to the employer login page
+      // ✅ MODIFICATION: Log the user out and redirect to the employer login page with a message
       logout();
-      navigate('/login/employer'); 
+      navigate('/login/employer', { 
+        state: { message: 'Registration successful! Please log in.' } 
+      });
     } else {
       setError(result.error);
     }

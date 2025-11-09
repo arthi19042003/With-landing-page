@@ -28,13 +28,16 @@ export default function EmployerProfile() {
     companyLocation: "",
     // dynamic lists
     projectSponsors: [], // array of strings
-    projects: [], // each project { projectName, teamSize, teamMembers: [ {firstName,..} ] }
+    projects: [], // each project { projectName, teamSize (now unused), teamMembers: [ {firstName,..} ] }
   });
 
   // UI helpers for add form inputs
   const [sponsorInput, setSponsorInput] = useState("");
   const [teamInput, setTeamInput] = useState(emptyTeamMember());
-  const [activeProjectIndex, setActiveProjectIndex] = useState(0);
+  
+  // State to track which member is being edited
+  // Format: { project: projectIndex, member: memberIndex }
+  const [editingIndex, setEditingIndex] = useState(null);
 
   const [message, setMessage] = useState({ type: "", text: "" });
 
@@ -46,11 +49,10 @@ export default function EmployerProfile() {
         return;
       }
       try {
-        const res = await api.get("/employer/profile");
-
-        const data = res.data || {};
-        // Some backends return { employer: {...} } or employer object directly. handle both.
-        const payload = data.employer || data;
+        const res = await api.get("/profile"); 
+        const data = res.data?.user?.profile || {};
+        const payload = data;
+        
         if (payload) {
           // Normalize minimal shape
           setForm(prev => ({
@@ -69,7 +71,7 @@ export default function EmployerProfile() {
             companyAddress: payload.companyAddress || prev.companyAddress,
             companyLocation: payload.companyLocation || prev.companyLocation,
             projectSponsors: Array.isArray(payload.projectSponsors) ? payload.projectSponsors : prev.projectSponsors,
-            projects: Array.isArray(payload.projects) ? payload.projects : prev.projects,
+            projects: Array.isArray(payload.projects) ? payload.projects.map(p => ({ ...p, teamMembers: p.teamMembers || [] })) : prev.projects,
           }));
         }
       } catch (err) {
@@ -109,13 +111,11 @@ export default function EmployerProfile() {
   const addProject = () => {
     setForm(f => ({
       ...f,
-      projects: [...f.projects, { projectName: "", teamSize: 0, teamMembers: [] }]
+      projects: [...f.projects, { projectName: "", teamMembers: [], collapsed: false }] 
     }));
-    setActiveProjectIndex(form.projects.length); // new project
   };
   const removeProject = (index) => {
     setForm(f => ({ ...f, projects: f.projects.filter((_, i) => i !== index) }));
-    setActiveProjectIndex(0);
   };
   const updateProjectField = (index, field, value) => {
     setForm(f => {
@@ -125,30 +125,73 @@ export default function EmployerProfile() {
     });
   };
 
-  // add team member to selected project index (default to first)
-  const addTeamMember = () => {
+  // Combined Add/Update Member function
+  const handleAddOrUpdateMember = (projectIndex) => {
     const name = teamInput.firstName.trim();
-    if (!name) return setMessage({ type: "error", text: "Team member first name is required" });
-    const index = activeProjectIndex ?? 0;
-    setForm(f => {
-      const projects = f.projects.length ? [...f.projects] : [{ projectName: "", teamSize: 0, teamMembers: [] }];
-      // ensure project exists
-      if (!projects[index]) projects[index] = { projectName: "", teamSize: 0, teamMembers: [] };
-      projects[index].teamMembers = [...(projects[index].teamMembers || []), { ...teamInput }];
-      projects[index].teamSize = projects[index].teamMembers.length;
-      return { ...f, projects };
-    });
+    if (!name) {
+        setMessage({ type: "error", text: "Team member first name is required" });
+        return;
+    }
+
+    // Check if we are in edit mode FOR THIS specific project
+    if (editingIndex && editingIndex.project === projectIndex) {
+      // --- UPDATE LOGIC ---
+      setForm(f => {
+        const newProjects = [...f.projects];
+        const project = newProjects[projectIndex];
+        // Create a new teamMembers array for immutability
+        project.teamMembers = project.teamMembers.map((member, index) => {
+          if (index === editingIndex.member) {
+            return teamInput; // Replace old member with new data
+          }
+          return member;
+        });
+        return { ...f, projects: newProjects };
+      });
+      setMessage({ type: "success", text: "Team member updated" });
+
+    } else {
+      // --- ADD LOGIC ---
+      setForm(f => {
+        const newProjects = [...f.projects];
+        const project = newProjects[projectIndex];
+        
+        if (!project) return f; // Safety check
+        
+        project.teamMembers = [...(project.teamMembers || []), { ...teamInput }];
+        return { ...f, projects: newProjects };
+      });
+      setMessage({ type: "success", text: "Team member added" });
+    }
+
+    // Reset form after add or update
     setTeamInput(emptyTeamMember());
-    setMessage({ type: "success", text: "Team member added" });
+    setEditingIndex(null);
   };
+
+  const handleEditMember = (projectIndex, memberIndex, member) => {
+    setTeamInput(member);
+    setEditingIndex({ project: projectIndex, member: memberIndex });
+  };
+  
+  const handleCancelEdit = () => {
+    setTeamInput(emptyTeamMember());
+    setEditingIndex(null);
+  };
+
   const removeTeamMember = (projectIndex, memberIndex) => {
     setForm(f => {
-      const projects = [...f.projects];
-      if (!projects[projectIndex]) return f;
-      projects[projectIndex].teamMembers = projects[projectIndex].teamMembers.filter((_, i) => i !== memberIndex);
-      projects[projectIndex].teamSize = projects[projectIndex].teamMembers.length;
-      return { ...f, projects };
+      const newProjects = [...f.projects];
+      const project = newProjects[projectIndex];
+      if (!project) return f;
+      
+      project.teamMembers = project.teamMembers.filter((_, i) => i !== memberIndex);
+      return { ...f, projects: newProjects };
     });
+    // If we were editing the member we just removed, clear the form
+    if (editingIndex?.project === projectIndex && editingIndex?.member === memberIndex) {
+      handleCancelEdit();
+    }
   };
 
   // Save -------------------------------------------------------------------
@@ -164,18 +207,28 @@ export default function EmployerProfile() {
   };
 
   const saveProfile = async () => {
-  if (!validateBeforeSave()) return;
-  setSaving(true);
-  try {
-    await api.put("/employer/profile", form);
-    setMessage({ type: "success", text: "Profile saved successfully" });
-  } catch (err) {
-    console.error(err);
-    setMessage({ type: "error", text: err?.response?.data?.message || "Error saving profile" });
-  } finally {
-    setSaving(false);
-  }
-};
+    if (!validateBeforeSave()) return;
+    setSaving(true);
+    
+    const payload = {
+      ...form,
+      projects: form.projects.map(({ collapsed, ...rest }) => ({
+        ...rest,
+        teamSize: rest.teamMembers.length 
+      }))
+    };
+
+    try {
+      await api.put("/profile", payload); 
+      setMessage({ type: "success", text: "Profile saved successfully" });
+    } catch (err) {
+      console.error(err);
+      setMessage({ type: "error", text: err?.response?.data?.message || "Error saving profile" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
 
   // Render -----------------------------------------------------------------
   if (loading) return <div className="emp-loading">Loading...</div>;
@@ -185,12 +238,6 @@ export default function EmployerProfile() {
       <div className="emp-inner">
         <h1 className="emp-title">Employer Profile</h1>
         <p className="emp-sub">Manage your company information and projects</p>
-
-        {message.text && (
-          <div className={`emp-alert ${message.type === "error" ? "error" : "success"}`}>
-            {message.text}
-          </div>
-        )}
 
         {/* --- Account / Hiring Manager --- */}
         <section className="card">
@@ -280,7 +327,7 @@ export default function EmployerProfile() {
             <div className="radio-row">
               <label><input type="radio" name="preferredCommunicationMode" value="Email"
                 checked={form.preferredCommunicationMode === "Email"} onChange={handleChange} /> Email</label>
-              <label style={{ marginLeft: 14 }}><input type="radio" name="preferredCommunicationMode" value="Phone"
+              <label><input type="radio" name="preferredCommunicationMode" value="Phone"
                 checked={form.preferredCommunicationMode === "Phone"} onChange={handleChange} /> Phone</label>
             </div>
           </div>
@@ -305,7 +352,7 @@ export default function EmployerProfile() {
             {form.projectSponsors.map((s, i) => (
               <div key={i} className="pill">
                 <span>{s}</span>
-                <button onClick={() => removeSponsor(i)} className="pill-remove">Remove</button>
+                <button onClick={() => removeSponsor(i)} className="pill-remove">×</button>
               </div>
             ))}
           </div>
@@ -327,80 +374,96 @@ export default function EmployerProfile() {
           {form.projects.map((p, pi) => (
             <div key={pi} className="project-card">
               <div className="project-top">
-                <strong>Project {pi + 1}</strong>
-                <div>
+                {/* ✅✅✅ FIX: Updated title logic */}
+                <strong>
+                  Project {pi + 1}
+                  {p.collapsed ? `: ${p.projectName || 'Untitled'} (Team Size: ${p.teamMembers.length})` : ''}
+                </strong>
+                <div className="project-top-actions">
                   <button className="btn tiny" onClick={() => updateProjectField(pi, "collapsed", !p.collapsed)}>{p.collapsed ? "Expand" : "Collapse"}</button>
                   <button className="btn danger tiny" onClick={() => removeProject(pi)}>Remove Project</button>
                 </div>
               </div>
 
-              <div className="two-cols">
-                <div>
-                  <label className="lbl">Project Name</label>
-                  <input value={p.projectName} onChange={(e) => updateProjectField(pi, "projectName", e.target.value)} placeholder="Enter project name" />
-                </div>
-                <div>
-                  <label className="lbl">Team Size</label>
-                  <input type="number" value={p.teamSize || 0} onChange={(e) => updateProjectField(pi, "teamSize", Number(e.target.value))} />
-                </div>
-              </div>
-
-              <div className="team-section">
-                <div className="team-top">
-                  <div><strong>Team Members</strong></div>
-                </div>
-
-                {/* list members */}
-                <div className="member-list">
-                  { (p.teamMembers || []).length === 0 && <div className="muted">No team members</div> }
-                  {(p.teamMembers || []).map((m, mi) => (
-                    <div className="member-row" key={mi}>
-                      <div className="member-info">
-                        <div><strong>Member {mi + 1}</strong></div>
-                        <div className="two-cols">
-                          <input value={m.firstName} readOnly placeholder="First name" />
-                          <input value={m.lastName} readOnly placeholder="Last name" />
-                        </div>
-                        <div className="two-cols">
-                          <input value={m.email} readOnly placeholder="Email" />
-                          <input value={m.phone} readOnly placeholder="Phone" />
-                        </div>
-                        <div><input value={m.role} readOnly placeholder="Role" /></div>
-                      </div>
-
-                      <div className="member-actions">
-                        <button className="btn tiny" onClick={() => { setActiveProjectIndex(pi); setTeamInput(m); }}>Edit</button>
-                        <button className="btn danger tiny" onClick={() => removeTeamMember(pi, mi)}>Remove</button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* add member UI - adds to the currently iterated project by selecting it */}
-                <div className="add-member-form">
+              {!p.collapsed && (
+                <>
                   <div className="two-cols">
-                    <input placeholder="First name" value={teamInput.firstName} onChange={(e) => setTeamInput(t => ({ ...t, firstName: e.target.value }))} />
-                    <input placeholder="Last name" value={teamInput.lastName} onChange={(e) => setTeamInput(t => ({ ...t, lastName: e.target.value }))} />
-                  </div>
-                  <div className="two-cols">
-                    <input placeholder="Email" value={teamInput.email} onChange={(e) => setTeamInput(t => ({ ...t, email: e.target.value }))} />
-                    <input placeholder="Phone" value={teamInput.phone} onChange={(e) => setTeamInput(t => ({ ...t, phone: e.target.value }))} />
-                  </div>
-                  <div className="row">
-                    <input placeholder="Role (e.g. Developer)" value={teamInput.role} onChange={(e) => setTeamInput(t => ({ ...t, role: e.target.value }))} />
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <button className="btn violet" onClick={addTeamMember}>+ Add Team Member</button>
-                      <button className="btn small" onClick={() => { setTeamInput(emptyTeamMember()); }}>Clear</button>
+                    <div>
+                      <label className="lbl">Project Name</label>
+                      <input value={p.projectName} onChange={(e) => updateProjectField(pi, "projectName", e.target.value)} placeholder="Enter project name" />
                     </div>
                   </div>
-                </div>
 
-              </div>
+                  <div className="team-section">
+                    <div className="team-top">
+                      <div><strong>Team Members</strong></div>
+                    </div>
+
+                    {/* list members */}
+                    <div className="member-list">
+                      { (p.teamMembers || []).length === 0 && <div className="muted">No team members</div> }
+                      {(p.teamMembers || []).map((m, mi) => (
+                        <div className="member-row" key={mi}>
+                          <div className="member-info">
+                            <div><strong>Member {mi + 1}</strong></div>
+                            <div className="two-cols">
+                              <input value={m.firstName} readOnly placeholder="First name" />
+                              <input value={m.lastName} readOnly placeholder="Last name" />
+                            </div>
+                            <div className="two-cols">
+                              <input value={m.email} readOnly placeholder="Email" />
+                              <input value={m.phone} readOnly placeholder="Phone" />
+                            </div>
+                            <div><input value={m.role} readOnly placeholder="Role" /></div>
+                          </div>
+
+                          <div className="member-actions">
+                            <button className="btn tiny" onClick={() => handleEditMember(pi, mi, m)}>Edit</button>
+                            <button className="btn danger tiny" onClick={() => removeTeamMember(pi, mi)}>Remove</button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* add member UI */}
+                    <div className="add-member-form">
+                      <div className="two-cols">
+                        <input placeholder="First name" value={teamInput.firstName} onChange={(e) => setTeamInput(t => ({ ...t, firstName: e.target.value }))} />
+                        <input placeholder="Last name" value={teamInput.lastName} onChange={(e) => setTeamInput(t => ({ ...t, lastName: e.target.value }))} />
+                      </div>
+                      <div className="two-cols">
+                        <input placeholder="Email" value={teamInput.email} onChange={(e) => setTeamInput(t => ({ ...t, email: e.target.value }))} />
+                        <input placeholder="Phone" value={teamInput.phone} onChange={(e) => setTeamInput(t => ({ ...t, phone: e.target.value }))} />
+                      </div>
+                      <div className="row">
+                        <input placeholder="Role (e.g. Developer)" value={teamInput.role} onChange={(e) => setTeamInput(t => ({ ...t, role: e.target.value }))} />
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <button className="btn violet" onClick={() => handleAddOrUpdateMember(pi)}>
+                            {editingIndex && editingIndex.project === pi ? 'Update Team Member' : '+ Add Team Member'}
+                          </button>
+                          {/* ✅ FIX: Show Cancel only when editing */}
+                          {editingIndex && editingIndex.project === pi && (
+                            <button className="btn small" onClick={handleCancelEdit}>Cancel</button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </>
+              )}
+
             </div>
           ))}
         </section>
 
         <div style={{ marginTop: 18 }}>
+          {message.text && (
+            <div className={`emp-alert ${message.type === "error" ? "error" : "success"}`}>
+              {message.text}
+            </div>
+          )}
+
           <button className="save-btn" onClick={saveProfile} disabled={saving}>
             {saving ? "Saving..." : "Save Employer Profile"}
           </button>

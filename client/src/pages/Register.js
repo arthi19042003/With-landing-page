@@ -17,7 +17,9 @@ const Register = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
+  
+  // ✅ MODIFICATION: Get both register and logout from useAuth
+  const { register, logout } = useAuth(); 
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -50,8 +52,15 @@ const Register = () => {
     
     setLoading(false);
 
-    if (result.success) navigate('/dashboard'); // Go to dashboard (or profile)
-    else setError(result.error);
+    // ✅ MODIFICATION: Change navigation on success
+    if (result.success) {
+      logout(); // Log out to clear the session token
+      navigate('/login', { 
+        state: { message: 'Registration successful! Please log in.' } 
+      });
+    } else {
+      setError(result.error);
+    }
   };
 
   return (

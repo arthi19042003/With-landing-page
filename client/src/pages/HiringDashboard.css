@@ -1,9 +1,10 @@
 /* ===== Hiring Dashboard (Purple & White Theme) ===== */
 .hiring-dashboard {
-  padding: 60px 80px;
+  padding: 110px 80px 60px 80px; /* ✅ MODIFIED: Increased top padding */
   background-color: #faf5ff; /* soft lavender */
   min-height: 100vh;
   font-family: 'Inter', sans-serif;
+  box-sizing: border-box; /* ✅ ADDED: Ensures padding is calculated correctly */
 }
 
 /* ===== Page Title ===== */
@@ -149,7 +150,7 @@
 /* ===== Responsive Design ===== */
 @media (max-width: 900px) {
   .hiring-dashboard {
-    padding: 30px 20px;
+    padding: 110px 20px 30px 20px; /* ✅ MODIFIED: Kept top padding */
   }
 
   .stats-grid {

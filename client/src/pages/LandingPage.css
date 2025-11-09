@@ -1,7 +1,7 @@
 /* client/src/pages/LandingPage.css */
 .landing-container {
   width: 100%;
-  padding-top: 80px; /* Space for fixed navbar */
+  padding-top: 110px; /* ✅ MODIFIED: Space for fixed navbar */
   color: #333;
   background-color: #fff;
 }

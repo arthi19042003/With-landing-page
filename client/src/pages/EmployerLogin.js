@@ -1,5 +1,7 @@
+// client/src/pages/EmployerLogin.js
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom"; // ✅ Import Link
+// ✅ MODIFICATION: Import useLocation
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
 import "../styles/Login.css"; // ✅ Import the shared login styles
@@ -10,6 +12,10 @@ export default function EmployerLogin() {
   const [error, setError] = useState(""); // ✅ Add error state
   const navigate = useNavigate();
   const { setUser } = useAuth();
+
+  // ✅ MODIFICATION: Get location and message from state
+  const location = useLocation();
+  const message = location.state?.message;
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -35,6 +41,14 @@ export default function EmployerLogin() {
     <div className="auth-page-container"> {/* ✅ Add wrapper for centering */}
       <div className="auth-card"> {/* ✅ Use the unified auth-card class */}
         <h2>Employer Login</h2>
+
+        {/* ✅ MODIFICATION: Display success message if it exists */}
+        {message && (
+          <div className="success">
+            {message}
+          </div>
+        )}
+
         <form onSubmit={handleLogin}>
           <div className="form-group">
             <label>Email</label>

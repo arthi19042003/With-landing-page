@@ -1,6 +1,6 @@
 /* Add space below navbar */
 .dashboard-container {
-  margin-top: 100px;
+  margin-top: 110px; /* ✅ MODIFIED: Increased top margin */
   padding: 20px;
   text-align: center;
 }
