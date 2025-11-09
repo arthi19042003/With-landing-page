@@ -1,10 +1,9 @@
 // client/src/components/Navbar.js
-import React from "react";
-import { Link, useNavigate } from "react-router-dom";
-// ✅ FIX: Import HashLink
-import { HashLink } from 'react-router-hash-link'; 
-import { useAuth } from "../context/AuthContext";
-import "./Navbar.css";
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { HashLink } from 'react-router-hash-link';
+import { useAuth } from '../context/AuthContext';
+import './Navbar.css';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -12,34 +11,42 @@ export default function Navbar() {
 
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    navigate('/login');
   };
 
-  const role = (user?.role || user?.userType || "").toLowerCase();
+  // Ensure role is always lowercase and defaults to 'candidate' if no user
+  const role = (user?.role || 'candidate').toLowerCase();
 
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        {/* ✅ FIX: Changed to HashLink. Goes to /#top if logged out, /dashboard if logged in. */}
-        <HashLink smooth to={user ? "/dashboard" : "/#top"} className="navbar-logo">
+        <HashLink smooth to={user ? '/dashboard' : '/#top'} className="navbar-logo">
           Smart Submissions
         </HashLink>
 
         <div className="navbar-menu">
           {!user ? (
             <>
-              {/* ✅ FIX: Use HashLink for scrolling links */}
+              {/* Logged-out links */}
               <HashLink smooth to="/#top" className="navbar-link">Home</HashLink>
               <HashLink smooth to="/#features" className="navbar-link">Features</HashLink>
               <HashLink smooth to="/#pricing" className="navbar-link">Sign Up</HashLink>
-              
               <Link to="/login" className="navbar-link">Login</Link>
               <Link to="/register/employer" className="navbar-btn">Post Job</Link>
             </>
           ) : (
             <>
               {/* Role-based links */}
-              {role === "employer" && (
+              {role === 'candidate' && (
+                <>
+                  <Link to="/dashboard" className="navbar-link">Dashboard</Link>
+                  <Link to="/profile" className="navbar-link">Profile</Link>
+                  <Link to="/resume" className="navbar-link">Resume</Link>
+                  <Link to="/interviews" className="navbar-link">Interviews</Link>
+                </>
+              )}
+
+              {role === 'employer' && (
                 <>
                   <Link to="/employer/dashboard" className="navbar-link">Dashboard</Link>
                   <Link to="/employer/profile" className="navbar-link">Profile</Link>
@@ -47,7 +54,7 @@ export default function Navbar() {
                 </>
               )}
 
-              {role === "hiringmanager" && (
+              {role === 'hiringmanager' && (
                 <>
                   <Link to="/hiring-manager/dashboard" className="navbar-link">Dashboard</Link>
                   <Link to="/hiring-manager/open-positions" className="navbar-link">Positions</Link>
@@ -56,20 +63,13 @@ export default function Navbar() {
                 </>
               )}
               
-              {role === "recruiter" && ( 
+              {/* ✅ --- UPDATED RECRUITER LINKS --- ✅ */}
+              {role === 'recruiter' && ( 
                 <>
-                  <Link to="/dashboard" className="navbar-link">Dashboard</Link>
+                  <Link to="/recruiter/dashboard" className="navbar-link">Dashboard</Link>
                   <Link to="/recruiter/profile" className="navbar-link">Profile</Link>
-                  <Link to="/recruiter/submit" className="navbar-link">Submit Candidate</Link>
-                </>
-              )}
-
-              {role === "candidate" && (
-                <>
-                  <Link to="/dashboard" className="navbar-link">Dashboard</Link>
-                  <Link to="/profile" className="navbar-link">Profile</Link>
-                  <Link to="/resume" className="navbar-link">Resume</Link>
-                  <Link to="/interviews" className="navbar-link">Interviews</Link>
+                  <Link to="/recruiter/submit-resume" className="navbar-link">Submit Resume</Link>
+                  <Link to="/recruiter/submission-status" className="navbar-link">Status</Link>
                 </>
               )}
 

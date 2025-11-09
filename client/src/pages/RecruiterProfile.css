@@ -1,0 +1,75 @@
+/* client/src/pages/RecruiterProfile.css */
+.profile-hub-container {
+    max-width: 900px;
+    margin: 110px auto 40px auto;
+    padding: 40px;
+    /* ✅ Theme: Set soft lavender background */
+    background: #faf5ff;
+    border-radius: 10px;
+    text-align: center;
+    /* ✅ Theme: Use standard card shadow */
+    box-shadow: 0 4px 12px rgba(91, 33, 182, 0.08);
+    border: 1.5px solid #ede9fe;
+}
+
+.profile-hub-container h1 {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+    /* ✅ Theme: Set deep purple color */
+    color: #5b21b6;
+}
+
+.profile-hub-container p {
+    font-size: 1.1rem;
+    /* ✅ Theme: Set muted text color */
+    color: #6b7280;
+    margin-bottom: 30px;
+}
+
+.profile-hub-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.hub-card {
+    padding: 30px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #333;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #e0e0e0;
+}
+
+.hub-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.hub-card h3 {
+    margin-top: 0;
+    font-size: 1.5rem;
+}
+
+.hub-card p {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 0;
+}
+
+/* ✅ Theme: Set purple heading colors */
+.hub-card.view h3 {
+    color: #6d28d9;
+}
+
+.hub-card.edit h3 {
+    color: #8b5cf6;
+}
+
+@media (max-width: 600px) {
+    .profile-hub-actions {
+        grid-template-columns: 1fr;
+    }
+}

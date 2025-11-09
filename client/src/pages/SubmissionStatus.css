@@ -1,0 +1,114 @@
+/* client/src/pages/SubmissionStatus.css */
+/* ✅ Theme: Using styles from existing CandidateList.css */
+.submission-status-page {
+    min-height: 100vh;
+    width: 100%;
+    /* ✅ Theme: Set soft lavender background */
+    background-color: var(--color-bg-soft, #faf5ff);
+    padding: 110px 20px 40px;
+    box-sizing: border-box;
+}
+
+.status-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    /* ✅ Theme: Match table shadow */
+    box-shadow: var(--shadow-main, 0 4px 12px rgba(91, 33, 182, 0.08));
+}
+
+.status-container h1 {
+    font-size: 30px;
+    font-weight: 700;
+    /* ✅ Theme: Set deep purple color */
+    color: var(--color-primary-deep, #5b21b6);
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.status-container > p {
+    text-align: center;
+    font-size: 16px;
+    /* ✅ Theme: Set muted text color */
+    color: var(--color-text-muted, #6b7280);
+    margin-bottom: 30px;
+}
+
+.loading-text,
+.error-text,
+.empty-text {
+    text-align: center;
+    font-size: 1rem;
+    padding: 40px;
+    color: var(--color-primary-action-hover, #7c3aed);
+    font-style: italic;
+    font-weight: 500;
+}
+
+.error-text {
+    color: #b91c1c;
+}
+
+.status-table-container {
+    overflow-x: auto;
+}
+
+.status-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.status-table th,
+.status-table td {
+    padding: 14px 18px;
+    text-align: left;
+    font-size: 0.95rem;
+    border-bottom: 1px solid #f3e8ff;
+}
+
+.status-table th {
+    /* ✅ Theme: Match table header */
+    background: var(--color-bg-light, #f3e8ff);
+    color: var(--color-primary-deep, #5b21b6);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-table tbody tr:nth-child(even) {
+    background-color: var(--color-bg-row-even, #faf5ff);
+}
+
+.status-table tbody tr:hover {
+    background-color: var(--color-bg-row-hover, #f5f3ff);
+}
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+/* ✅ Theme: Match badges from CandidateHistory.css */
+.status-badge.submitted, 
+.status-badge.scheduled, 
+.status-badge.pending,
+.status-badge.under-review,
+.status-badge.reviewed,
+.status-badge.interviewed {
+  background-color: #e0e7ff; color: #3730a3;
+}
+.status-badge.shortlisted, 
+.status-badge.pass, 
+.status-badge.completed,
+.status-badge.hired {
+  background-color: #d1fae5; color: #065f46;
+}
+.status-badge.rejected, 
+.status-badge.fail {
+  background-color: #fee2e2; color: #991b1b;
+}

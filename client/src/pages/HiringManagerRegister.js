@@ -1,8 +1,8 @@
 // client/src/pages/HiringManagerRegister.js
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom"; // ✅ Import Link
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import "../styles/Login.css"; // ✅ Import the shared login styles
+import "../styles/Login.css"; 
 
 export default function HiringManagerRegister() {
   const [form, setForm] = useState({
@@ -11,7 +11,9 @@ export default function HiringManagerRegister() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { register } = useAuth(); // ✅ Use register from context
+  
+  // ✅ FIX: Get both register and logout from useAuth
+  const { register, logout } = useAuth(); 
 
   const handleChange = (e) => setForm({...form, [e.target.name]: e.target.value });
 
@@ -26,7 +28,6 @@ export default function HiringManagerRegister() {
     
     setLoading(true);
     
-    // ✅ Use the register function from context
     const result = await register({
       firstName: form.firstName,
       lastName: form.lastName,
@@ -34,21 +35,25 @@ export default function HiringManagerRegister() {
       email: form.email,
       phone: form.phone,
       password: form.password,
-      role: "hiringManager" // ✅ Specify the role
+      role: "hiringManager" 
     });
     
     setLoading(false);
 
+    // ✅ FIX: Changed navigation logic
     if (result.success) {
-      navigate("/hiring-manager/dashboard");
+      logout(); // Log out to clear any session
+      navigate("/login/hiring-manager", { 
+        state: { message: "Registration successful! Please log in." } 
+      });
     } else {
       setError(result.error);
     }
   };
 
   return (
-    <div className="auth-page-container"> {/* ✅ Add wrapper for centering */}
-      <div className="auth-card"> {/* ✅ Use the unified auth-card class */}
+    <div className="auth-page-container"> 
+      <div className="auth-card"> 
         <h2>Hiring Manager - Register</h2>
         
         <form onSubmit={handleSubmit}>

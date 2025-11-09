@@ -1,0 +1,152 @@
+/* client/src/pages/ResumeUploadRecruiter.css */
+/* ✅ Theme: Using styles from existing Profile.css */
+.resume-upload-page {
+    min-height: 100vh;
+    width: 100%;
+    /* ✅ Theme: Set transparent bg, lets global #f0f2f5 show */
+    background-color: transparent; 
+    padding: 110px 20px 40px;
+    display: flex;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.upload-container {
+    width: 900px;
+    max-width: 100%;
+    /* ✅ Theme: Match 'profile-container' */
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    border: 1px solid #ececec;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.upload-container h1 {
+    font-size: 28px;
+    font-weight: 650;
+    /* ✅ Theme: Set purple color */
+    color: #5b2eca;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.upload-container > p {
+    text-align: center;
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 25px;
+}
+
+.upload-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-card {
+    /* ✅ Theme: Match 'card' */
+    background: #ffffff;
+    border: 1px solid #e8e8e8;
+    padding: 18px;
+    border-radius: 10px;
+    margin-bottom: 0; /* Gap is handled by form */
+}
+
+.form-card h2 {
+    font-size: 18px;
+    font-weight: 600;
+    /* ✅ Theme: Set purple color */
+    color: #5b2eca;
+    margin-bottom: 12px;
+}
+
+.form-card p {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: -10px;
+    margin-bottom: 15px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #333;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    /* ✅ Theme: Purple-tinted border */
+    border: 1px solid #cfcfe8; 
+    border-radius: 8px;
+    font-size: 15px;
+    transition: .2s;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    /* ✅ Theme: Purple focus */
+    border-color: #5b2eca;
+    box-shadow: 0 0 6px rgba(91,46,202,0.3);
+    outline: none;
+}
+
+.form-group input[type="file"] {
+    padding: 10px;
+    background: #fdfdfd;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.submit-btn {
+    /* ✅ Theme: Match 'btn-primary' */
+    background: linear-gradient(90deg, #5b2eca, #8a4ff2);
+    color: white;
+    border: none;
+    padding: 16px;
+    width: 100%;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+}
+.submit-btn:hover {
+    opacity: 0.9;
+}
+.submit-btn:disabled {
+    background: #aaa;
+    cursor: not-allowed;
+}
+
+.message-box {
+    padding: 15px;
+    border-radius: 6px;
+    margin: 0 0 10px;
+    font-weight: 500;
+    text-align: center;
+}
+.message-box.success {
+    background: #d4edda;
+    color: #155724;
+}
+.message-box.error {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+@media (max-width: 600px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}

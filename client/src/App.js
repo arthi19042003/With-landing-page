@@ -13,6 +13,8 @@ import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import EmployerLogin from "./pages/EmployerLogin";
 import HiringManagerLogin from "./pages/HiringManagerLogin";
+import RecruiterLogin from "./pages/RecruiterLogin"; // ✅ Kept this
+
 import Register from "./pages/Register";
 import EmployerRegister from "./pages/EmployerRegister";
 import HiringManagerRegister from "./pages/HiringManagerRegister";
@@ -22,16 +24,20 @@ import RecruiterRegister from "./pages/RecruiterRegister";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import ResumeUpload from "./pages/ResumeUpload";
-import CandidateInterviewList from "./pages/Interviews"; // This is the candidate's view
+import CandidateInterviewList from "./pages/Interviews"; 
 
 // ==================== Employer Pages ====================
 import EmployerDashboard from "./pages/Dashboard"; 
 import EmployerProfile from "./pages/EmployerProfile";
 import CreatePosition from "./pages/CreatePosition"; 
 
-// ==================== Recruiter Pages ====================
+// ==================== Recruiter Pages (NEW) ====================
+import RecruiterDashboard from "./pages/RecruiterDashboard";
 import RecruiterProfile from "./pages/RecruiterProfile"; 
-import SubmitCandidate from "./pages/SubmitCandidate"; 
+import RecruiterProfileEdit from "./pages/RecruiterProfileEdit";
+import RecruiterProfileView from "./pages/RecruiterProfileView";
+import ResumeUploadRecruiter from "./pages/ResumeUploadRecruiter"; 
+import SubmissionStatus from "./pages/SubmissionStatus";
 
 // ==================== Hiring Manager Pages ====================
 import HiringManagerDashboard from "./pages/HiringDashboard"; 
@@ -40,9 +46,9 @@ import OpenPositions from "./pages/Positions";
 import CandidateListPage from "./pages/CandidateList";
 import InterviewManagementPage from "./pages/InterviewDetails"; 
 import Onboarding from "./pages/Onboarding"; 
-import HiringReports from "./pages/PurchaseOrders"; // This page doubles as PO page
+import HiringReports from "./pages/PurchaseOrders"; 
 
-// ✅ NEW: Import the new pages
+// ==================== New Pages ====================
 import CandidateHistory from "./pages/CandidateHistory";
 import PositionDetails from "./pages/PositionDetails";
 
@@ -54,7 +60,7 @@ function RoleBasedDashboard() {
   const role = (user.role || user.userType || "").toLowerCase();
 
   if (role === "employer") return <Navigate to="/employer/dashboard" />;
-  if (role === "recruiter") return <Navigate to="/dashboard" />;
+  if (role === "recruiter") return <Navigate to="/recruiter/dashboard" />;
   if (role === "hiringmanager") return <Navigate to="/hiring-manager/dashboard" />;
   
   return <Dashboard />; // candidate default
@@ -75,6 +81,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/login/employer" element={<EmployerLogin />} />
             <Route path="/login/hiring-manager" element={<HiringManagerLogin />} />
+            <Route path="/login/recruiter" element={<RecruiterLogin />} />
 
             <Route path="/register" element={<Register />} />
             <Route path="/register/employer" element={<EmployerRegister />} />
@@ -90,8 +97,6 @@ function App() {
                 </PrivateRoute>
               }
             />
-
-            {/* ... (Candidate, Employer, Recruiter routes remain the same) ... */}
             
             {/* ==================== Candidate Routes ==================== */}
             <Route
@@ -136,8 +141,7 @@ function App() {
                 </PrivateRoute>
               }
             />
-             {/* Shared route for Employers and Managers */}
-            <Route
+             <Route
               path="/positions/new"
               element={
                 <PrivateRoute>
@@ -146,7 +150,15 @@ function App() {
               }
             />
             
-            {/* ==================== Recruiter Routes ==================== */}
+            {/* ==================== Recruiter Routes (NEW) ==================== */}
+            <Route
+              path="/recruiter/dashboard"
+              element={
+                <PrivateRoute>
+                  <RecruiterDashboard />
+                </PrivateRoute>
+              }
+            />
              <Route
               path="/recruiter/profile"
               element={
@@ -156,14 +168,37 @@ function App() {
               }
             />
             <Route
-              path="/recruiter/submit"
+              path="/recruiter/profile/view"
               element={
                 <PrivateRoute>
-                  <SubmitCandidate />
+                  <RecruiterProfileView />
                 </PrivateRoute>
               }
             />
-
+            <Route
+              path="/recruiter/profile/edit"
+              element={
+                <PrivateRoute>
+                  <RecruiterProfileEdit />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/recruiter/submit-resume"
+              element={
+                <PrivateRoute>
+                  <ResumeUploadRecruiter />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/recruiter/submission-status"
+              element={
+                <PrivateRoute>
+                  <SubmissionStatus />
+                </PrivateRoute>
+              }
+            />
 
             {/* ==================== Hiring Manager Routes ==================== */}
             <Route
@@ -199,7 +234,6 @@ function App() {
               }
             />
             
-            {/* ✅ NEW: Route for single candidate history */}
             <Route
               path="/hiring-manager/candidate/:id"
               element={
@@ -209,7 +243,6 @@ function App() {
               }
             />
             
-            {/* ✅ NEW: Route for single position details */}
             <Route
               path="/hiring-manager/position/:id"
               element={

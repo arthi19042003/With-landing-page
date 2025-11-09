@@ -1,0 +1,94 @@
+/* client/src/pages/RecruiterDashboard.css */
+.recruiter-dashboard {
+    padding: 110px 40px 40px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    font-family: "Inter", sans-serif;
+    /* ✅ Theme: Set soft lavender background */
+    background-color: #faf5ff; 
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.dashboard-header h1 {
+    font-size: 2.5rem;
+    /* ✅ Theme: Set deep purple color */
+    color: #5b21b6;
+    font-weight: 700;
+}
+
+.dashboard-header p {
+    font-size: 1.1rem;
+    /* ✅ Theme: Set muted text color */
+    color: #6b7280;
+}
+
+.dashboard-widgets {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+}
+
+.widget-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 30px; 
+    text-decoration: none;
+    color: inherit;
+    /* ✅ Theme: Use standard card shadow */
+    box-shadow: 0 4px 12px rgba(91, 33, 182, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    /* ✅ Theme: Use soft purple border */
+    border: 1.5px solid #ede9fe;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 160px; 
+    
+    /* ✅ FIX: Moved the border here to apply to ALL cards */
+    border-left: 5px solid #7c3aed; 
+}
+
+.widget-card:hover {
+    transform: translateY(-5px);
+    /* ✅ Theme: Use purple shadow on hover */
+    box-shadow: 0 6px 16px rgba(91, 33, 182, 0.12);
+}
+
+.widget-card h3 {
+    margin-top: 0;
+    font-size: 1.5rem;
+    /* ✅ THEME FIX: Set all headings to the same purple color */
+    color: #6d28d9;
+    margin-bottom: 10px;
+}
+
+.widget-card p {
+    font-size: 1rem;
+    color: #444;
+    line-height: 1.5;
+    margin-bottom: 0; 
+}
+
+/* * 🛑 REMOVED this section as the border is now on .widget-card
+ *
+.profile-card,
+.profile-card-edit,
+.submit-card,
+.status-card {
+    border-left: 5px solid #7c3aed; 
+}
+*/
+
+/* Media query to stack cards on mobile */
+@media (max-width: 768px) {
+    .dashboard-widgets {
+        /* On smaller screens, stack to 1 column */
+        grid-template-columns: 1fr;
+    }
+}

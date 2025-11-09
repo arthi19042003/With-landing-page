@@ -46,7 +46,7 @@ app.use("/api/auth", require("./routes/auth"));
 // ===============================================
 app.use("/api/profile", require("./routes/profile"));
 app.use("/api/resume", require("./routes/resume"));
-app.use("/api/interview", require("./routes/interviewRoutes"));
+// app.use("/api/interview", require("./routes/interviewRoutes")); // ❌ REMOVED This conflicting route
 
 // ===============================================
 // Employer Routes
@@ -69,7 +69,8 @@ app.use("/api/recruiter", protect, require("./routes/recruiter")); // ✅ NEW RO
 app.use("/api/inbox", protect, require("./routes/inbox"));
 app.use("/api/positions", protect, require("./routes/positions"));
 app.use("/api/candidates", protect, require("./routes/candidates"));
-app.use("/api/interviews", protect, require("./routes/interviews"));
+// ✅ FIXED: Pointed /api/interviews to the correct file
+app.use("/api/interviews", protect, require("./routes/interviewRoutes"));
 app.use("/api/onboarding", protect, require("./routes/onboarding"));
 app.use("/api/po", protect, require("./routes/po"));
 app.use("/api/dashboard", protect, require("./routes/dashboard"));

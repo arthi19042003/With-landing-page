@@ -1,9 +1,10 @@
 // client/src/pages/HiringManagerLogin.js
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate, Link } from "react-router-dom"; // ✅ Import Link
+// ✅ FIX: Import useLocation
+import { useNavigate, Link, useLocation } from "react-router-dom"; 
 import { useAuth } from "../context/AuthContext";
-import "../styles/Login.css"; // ✅ Import the shared login styles
+import "../styles/Login.css"; 
 
 export default function HiringManagerLogin() {
   const [email, setEmail] = useState("");
@@ -13,21 +14,24 @@ export default function HiringManagerLogin() {
   const navigate = useNavigate();
   const { setUser } = useAuth();
 
+  // ✅ FIX: Get location and message from state
+  const location = useLocation();
+  const message = location.state?.message;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErr("");
     setLoading(true);
     try {
-      // ✅ FIX: Point to the unified /api/auth/login route
       const res = await axios.post("/api/auth/login", { 
         email, 
         password, 
-        role: "hiringManager" // ✅ Pass the role
+        role: "hiringManager" 
       }); 
       
-      const { data } = res; // ✅ data is at res.data
+      const { data } = res; 
       localStorage.setItem("token", data.token);
-      setUser(data.user); // ✅ user is at data.user
+      setUser(data.user); 
       navigate("/hiring-manager/dashboard");
     } catch (error) {
       setErr(error?.response?.data?.message || "Login failed");
@@ -38,10 +42,17 @@ export default function HiringManagerLogin() {
   };
 
   return (
-    <div className="auth-page-container"> {/* ✅ Add wrapper for centering */}
-      <div className="auth-card"> {/* ✅ Use the unified auth-card class */}
+    <div className="auth-page-container"> 
+      <div className="auth-card"> 
         <h2>Hiring Manager Login</h2>
         
+        {/* ✅ FIX: Display success message if it exists */}
+        {message && (
+          <div className="success">
+            {message}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Email</label>

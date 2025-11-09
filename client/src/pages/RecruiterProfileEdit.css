@@ -1,0 +1,190 @@
+/* client/src/pages/RecruiterProfileEdit.css */
+/* ✅ Theme: Using styles from existing Profile.css */
+.profile-edit-page {
+    min-height: 100vh;
+    width: 100%;
+    /* ✅ Theme: Set transparent bg, lets global #f0f2f5 show */
+    background-color: transparent; 
+    padding: 110px 20px 40px;
+    display: flex;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.profile-edit-container {
+    width: 900px;
+    max-width: 100%;
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    border: 1px solid #ececec;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.profile-edit-container h1 {
+    font-size: 28px;
+    font-weight: 650;
+    /* ✅ Theme: Set purple color */
+    color: #5b2eca;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.profile-edit-container > p {
+    text-align: center;
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 25px;
+}
+
+.profile-card {
+    background: #ffffff;
+    border: 1px solid #e8e8e8;
+    padding: 18px;
+    border-radius: 10px;
+    margin-bottom: 18px;
+}
+
+.profile-card h2 {
+    font-size: 18px;
+    font-weight: 600;
+    /* ✅ Theme: Set purple color */
+    color: #5b2eca;
+    margin-bottom: 12px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #333;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cfcfe8; /* ✅ Theme: Purple-tinted border */
+    border-radius: 8px;
+    font-size: 15px;
+    transition: .2s;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    /* ✅ Theme: Purple focus */
+    border-color: #5b2eca;
+    box-shadow: 0 0 6px rgba(91,46,202,0.3);
+    outline: none;
+}
+
+.form-group input:disabled {
+    background: #f4f4f4;
+    cursor: not-allowed;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.list-input {
+    display: flex;
+    gap: 10px;
+}
+.list-input input {
+    flex-grow: 1;
+}
+
+.add-btn {
+    /* ✅ Theme: Match 'add-skill-btn' */
+    background: linear-gradient(90deg, #5b2eca, #8a4ff2);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 15px;
+}
+.add-btn:hover { opacity: .9; }
+
+.item-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.item-tag {
+    /* ✅ Theme: Match 'skill-tag' */
+    background: #6a43ff;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 4px;
+}
+
+.item-remove {
+    /* ✅ Theme: Match 'skill-remove' */
+    border: none;
+    background: none;
+    color: white;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+}
+.item-remove:hover {
+    opacity: 0.8;
+}
+
+.message-box {
+    padding: 15px;
+    border-radius: 6px;
+    margin: 15px 0;
+    font-weight: 500;
+    text-align: center;
+}
+.message-box.success {
+    background: #d4edda;
+    color: #155724;
+}
+.message-box.error {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.save-btn {
+    /* ✅ Theme: Match 'btn-primary' */
+    background: linear-gradient(90deg, #5b2eca, #8a4ff2);
+    border: none;
+    padding: 14px;
+    width: 100%;
+    border-radius: 10px;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+}
+.save-btn:hover { opacity: .9; }
+.save-btn:disabled {
+    background: #aaa;
+    cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}

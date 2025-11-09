@@ -111,7 +111,7 @@ function InterviewDetails() {
     <div className="page interviewer-bg fade">
       <div className="card form-card">
         <h2 className="form-title">{editingId ? "Update Interview" : "Interviewer Details"}</h2>
-        {message && <div className="msg-box">{message}</div>}
+        {/* ❌ Message moved from here */}
 
         <form onSubmit={handleSubmit}>
 
@@ -207,6 +207,9 @@ function InterviewDetails() {
             <textarea name="feedback" value={form.feedback} onChange={handleChange} />
           </div>
 
+          {/* ✅ Message moved here, just above the button */}
+          {message && <div className="msg-box">{message}</div>}
+          
           <button type="submit" className="purple-btn full">
             {editingId ? "Update Interview" : "Save Interview"}
           </button>

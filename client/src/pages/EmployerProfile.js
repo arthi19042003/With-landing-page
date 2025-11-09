@@ -135,32 +135,52 @@ export default function EmployerProfile() {
 
     // Check if we are in edit mode FOR THIS specific project
     if (editingIndex && editingIndex.project === projectIndex) {
-      // --- UPDATE LOGIC ---
-      setForm(f => {
-        const newProjects = [...f.projects];
-        const project = newProjects[projectIndex];
-        // Create a new teamMembers array for immutability
-        project.teamMembers = project.teamMembers.map((member, index) => {
-          if (index === editingIndex.member) {
-            return teamInput; // Replace old member with new data
+      
+      // --- ✅ FIX: IMMUTABLE UPDATE LOGIC ---
+      setForm(f => ({
+        ...f,
+        projects: f.projects.map((project, pIdx) => {
+          // Not the project we're editing, return it as-is
+          if (pIdx !== projectIndex) {
+            return project;
           }
-          return member;
-        });
-        return { ...f, projects: newProjects };
-      });
+
+          // This IS the project. Return a new project object...
+          return {
+            ...project,
+            // ...with a new teamMembers array
+            teamMembers: project.teamMembers.map((member, mIdx) => {
+              // Not the member we're editing, return it as-is
+              if (mIdx !== editingIndex.member) {
+                return member;
+              }
+              // This IS the member. Return the new data from teamInput.
+              return teamInput; 
+            })
+          };
+        })
+      }));
       setMessage({ type: "success", text: "Team member updated" });
 
     } else {
-      // --- ADD LOGIC ---
-      setForm(f => {
-        const newProjects = [...f.projects];
-        const project = newProjects[projectIndex];
-        
-        if (!project) return f; // Safety check
-        
-        project.teamMembers = [...(project.teamMembers || []), { ...teamInput }];
-        return { ...f, projects: newProjects };
-      });
+      
+      // --- ✅ FIX: IMMUTABLE ADD LOGIC ---
+      setForm(f => ({
+        ...f,
+        projects: f.projects.map((project, index) => {
+          // If this isn't the project we're adding to, return it unchanged.
+          if (index !== projectIndex) {
+            return project;
+          }
+          
+          // If it *is* the project, return a *new* project object
+          return {
+            ...project,
+            // With a *new* teamMembers array that includes the new member
+            teamMembers: [...(project.teamMembers || []), { ...teamInput }]
+          };
+        })
+      }));
       setMessage({ type: "success", text: "Team member added" });
     }
 
@@ -181,13 +201,24 @@ export default function EmployerProfile() {
 
   const removeTeamMember = (projectIndex, memberIndex) => {
     setForm(f => {
-      const newProjects = [...f.projects];
-      const project = newProjects[projectIndex];
-      if (!project) return f;
+      // Create a new projects array
+      const newProjects = f.projects.map((project, pIdx) => {
+        // Not the project we're editing, return as-is
+        if (pIdx !== projectIndex) {
+          return project;
+        }
+        
+        // This IS the project, return a new object
+        return {
+          ...project,
+          // With a new teamMembers array that filters out the removed member
+          teamMembers: project.teamMembers.filter((_, mIdx) => mIdx !== memberIndex)
+        };
+      });
       
-      project.teamMembers = project.teamMembers.filter((_, i) => i !== memberIndex);
       return { ...f, projects: newProjects };
     });
+    
     // If we were editing the member we just removed, clear the form
     if (editingIndex?.project === projectIndex && editingIndex?.member === memberIndex) {
       handleCancelEdit();
