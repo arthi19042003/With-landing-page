@@ -1,158 +1,174 @@
-// client/src/pages/ResumeUploadRecruiter.js
-import React, { useState } from 'react';
-import api from '../api/axios'; // Use your configured axios instance
-import './ResumeUploadRecruiter.css';
+import React, { useState } from "react";
+import "./ResumeUploadRecruiter.css";
+import api from "../config";
 
 const ResumeUploadRecruiter = () => {
-    const [file, setFile] = useState(null);
-    const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        jobTitle: '',
-        skills: '',
-        experience: '',
-        education: '',
+  const formFields = {
+    candidateName: { label: "Candidate Name*", type: "text", placeholder: "Enter candidate name" },
+    email: { label: "Email*", type: "email", placeholder: "Enter candidate email" },
+    phone: { label: "Phone*", type: "tel", placeholder: "Enter phone number" },
+    skypeId: { label: "Skype ID (Optional)", type: "text", placeholder: "Enter Skype ID" },
+    rate: { label: "Desired Rate ($/hr)*", type: "number", placeholder: "Enter rate in $/hr" },
+    location: { label: "Location (City, State)*", type: "text", placeholder: "Enter location" },
+    availability: { label: "Availability (e.g., Immediate)*", type: "text", placeholder: "Enter availability" },
+    github: { label: "GitHub URL (Optional)", type: "url", placeholder: "Enter GitHub profile URL" },
+    linkedin: { label: "LinkedIn URL (Optional)", type: "url", placeholder: "Enter LinkedIn profile URL" },
+    hiringManager: { label: "Hiring Manager*", type: "text", placeholder: "Enter hiring manager name" },
+    company: { label: "Company Name*", type: "text", placeholder: "Enter company name" },
+  };
+
+  const requiredFields = [
+    "candidateName",
+    "email",
+    "phone",
+    "rate",
+    "location",
+    "availability",
+    "hiringManager",
+    "company",
+  ];
+
+  const initialForm = Object.keys(formFields).reduce((acc, key) => {
+    acc[key] = "";
+    return acc;
+  }, {});
+
+  const [form, setForm] = useState(initialForm);
+  const [file, setFile] = useState(null);
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  // --- Validation ---
+  const validateField = (name, value) => {
+    let error = "";
+    const trimmedValue = value.trim();
+
+    if (requiredFields.includes(name) && !trimmedValue)
+      error = "This field is required";
+
+    if (trimmedValue) {
+      switch (name) {
+        case "email":
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedValue))
+            error = "Enter a valid email";
+          break;
+        case "phone":
+          if (!/^\+\d+(?:\s?\d+)*$/.test(trimmedValue))
+            error =
+              "Phone number must start with +, followed by country code and digits (spaces allowed)";
+          break;
+
+        case "rate":
+          if (!/^[0-9]{1,5}$/.test(trimmedValue))
+            error = "Enter a valid rate (up to 5 digits)";
+          break;
+        default:
+          break;
+      }
+    }
+
+    return error;
+  };
+
+  // --- Handle input changes ---
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    setErrors({ ...errors, [name]: validateField(name, value) });
+  };
+
+  // --- Handle submit ---
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setMessage("");
+    const newErrors = {};
+
+    Object.entries(form).forEach(([key, val]) => {
+      const err = validateField(key, val);
+      if (err) newErrors[key] = err;
     });
-    const [message, setMessage] = useState({ type: '', text: '' });
-    const [loading, setLoading] = useState(false);
+    if (!file) newErrors.file = "Please upload a resume file";
+    setErrors(newErrors);
 
-    const handleFileChange = (e) => {
-        setFile(e.target.files[0]);
-    };
+    if (Object.keys(newErrors).length > 0) {
+      setMessage("❌ Please fix the errors before submitting.");
+      return;
+    }
 
-    const handleFormChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
-    };
+    setLoading(true);
+    try {
+      const fd = new FormData();
+      Object.entries(form).forEach(([k, v]) => fd.append(k, v));
+      fd.append("resume", file);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!file) {
-            setMessage({ type: 'error', text: 'Please select a resume file to upload.' });
-            return;
-        }
+      await api.post("/resume/upload", fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-        setLoading(true);
-        setMessage({ type: '', text: '' });
+      setMessage("✅ Resume submitted successfully!");
+      setForm(initialForm);
+      setFile(null);
+    } catch (err) {
+      setMessage(err.response?.data?.message || "❌ Error submitting resume");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        const uploadData = new FormData();
-        uploadData.append('resume', file);
-        
-        // Append all other form data
-        Object.keys(formData).forEach(key => {
-            uploadData.append(key, formData[key]);
-        });
+  return (
+    <div className="resume-upload-page">
+      <div className="resume-upload-card">
+        <h2 className="resume-upload-title">Submit Candidate Resume</h2>
 
-        try {
-            // Adjust this endpoint to your actual backend route for resume submission
-            // This assumes a new route /recruiter/submit for handling this form
-            const response = await api.post('/recruiter/submit', uploadData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
-            
-            setMessage({ type: 'success', text: response.data.message || 'Resume submitted successfully!' });
-            // Clear form
-            setFile(null);
-            setFormData({
-                firstName: '', lastName: '', email: '', phone: '',
-                jobTitle: '', skills: '', experience: '', education: '',
-            });
-            // Clear file input
-            document.getElementById('resume-file-input').value = null;
-
-        } catch (error) {
-            setMessage({ type: 'error', text: error.response?.data?.message || 'Submission failed. Please try again.' });
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    return (
-        <div className="resume-upload-page">
-            <div className="upload-container">
-                <h1>Submit Candidate Resume</h1>
-                <p>Fill in the candidate details and upload their resume.</p>
-
-                {message.text && (
-                    <div className={`message-box ${message.type}`}>
-                        {message.text}
-                    </div>
-                )}
-
-                <form onSubmit={handleSubmit} className="upload-form">
-                    <div className="form-card">
-                        <h2>Candidate Details</h2>
-                        <div className="form-row">
-                            <div className="form-group">
-                                <label>First Name *</label>
-                                <input type="text" name="firstName" value={formData.firstName} onChange={handleFormChange} required />
-                            </div>
-                            <div className="form-group">
-                                <label>Last Name *</label>
-                                <input type="text" name="lastName" value={formData.lastName} onChange={handleFormChange} required />
-                            </div>
-                        </div>
-                        <div className="form-row">
-                             <div className="form-group">
-                                <label>Email *</label>
-                                <input type="email" name="email" value={formData.email} onChange={handleFormChange} required />
-                            </div>
-                             <div className="form-group">
-                                <label>Phone *</label>
-                                <input type="tel" name="phone" value={formData.phone} onChange={handleFormChange} required />
-                            </div>
-                        </div>
-                         <div className="form-group">
-                            <label>Job Title / Position Applied For *</label>
-                            <input type="text" name="jobTitle" value={formData.jobTitle} onChange={handleFormChange} required />
-                        </div>
-                    </div>
-
-                    <div className="form-card">
-                        <h2>Resume File</h2>
-                         <div className="form-group">
-                            <label>Upload Resume (PDF, DOC, DOCX) *</label>
-                            <input 
-                                id="resume-file-input"
-                                type="file" 
-                                name="resume" 
-                                onChange={handleFileChange} 
-                                accept=".pdf,.doc,.docx"
-                                required 
-                            />
-                        </div>
-                    </div>
-                    
-                    <div className="form-card">
-                        <h2>Key Information (Optional)</h2>
-                        <p>Help parse the resume by providing key details.</p>
-                         <div className="form-group">
-                            <label>Skills (comma-separated)</label>
-                            <input type="text" name="skills" value={formData.skills} onChange={handleFormChange} placeholder="e.g., React, Node.js, Python" />
-                        </div>
-                        <div className="form-group">
-                            <label>Years of Experience</label>
-                            <input type="number" name="experience" value={formData.experience} onChange={handleFormChange} placeholder="e.g., 5" />
-                        </div>
-                         <div className="form-group">
-                            <label>Highest Education</label>
-                            <input type="text" name="education" value={formData.education} onChange={handleFormChange} placeholder="e.g., B.S. Computer Science" />
-                        </div>
-                    </div>
-
-                    <button type="submit" className="submit-btn" disabled={loading}>
-                        {loading ? 'Submitting...' : 'Submit Candidate Resume'}
-                    </button>
-                </form>
+        <form onSubmit={handleSubmit} className="resume-upload-form" noValidate>
+          {Object.entries(formFields).map(([key, field]) => (
+            <div className="form-group" key={key}>
+              <label htmlFor={key}>{field.label}</label>
+              <input
+                id={key}
+                type={field.type}
+                name={key}
+                placeholder={field.placeholder}
+                value={form[key]}
+                onChange={handleChange}
+                className={errors[key] ? "error" : ""}
+              />
+              {errors[key] && (
+                <span className="error-text">{errors[key]}</span>
+              )}
             </div>
-        </div>
-    );
+          ))}
+
+          <div className="form-group file-upload">
+            <label className="file-label" htmlFor="resume">
+              📎 Upload Resume (PDF)*
+            </label>
+            <input
+              id="resume"
+              type="file"
+              accept=".pdf"
+              onChange={(e) => setFile(e.target.files[0])}
+            />
+            {errors.file && <span className="error-text">{errors.file}</span>}
+          </div>
+          
+          {message && (
+          <p
+            className={`resume-upload-message ${message.startsWith("✅") ? "success-text" : "error-text"
+              }`}
+          >
+            {message}
+          </p>
+        )}
+
+          <button type="submit" className="resume-upload-btn" disabled={loading}>
+            {loading ? "Submitting..." : "Send Resume"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
 };
 
 export default ResumeUploadRecruiter;

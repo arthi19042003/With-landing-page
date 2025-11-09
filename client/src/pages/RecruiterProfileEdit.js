@@ -1,233 +1,276 @@
-// client/src/pages/RecruiterProfileEdit.js
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import api from '../api/axios';
-import './RecruiterProfileEdit.css'; // Using the new CSS file
+import React, { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import "./RecruiterProfile.css";
 
 const RecruiterProfileEdit = () => {
-  const { user, updateUser } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState({ type: '', text: '' });
-  
-  const [formData, setFormData] = useState({
-    agencyName: '',
-    firstName: '',
-    lastName: '',
-    phone: '',
-    // Recruiter-specific fields
-    companyWebsite: '',
-    companyPhone: '',
-    companyAddress: '',
-    companyLocation: '',
-    dunsNumber: '',
-    employeeCount: '',
-    rateCard: '',
-    majorSkills: [],
-    partnerships: [],
-    companyCertifications: [],
-  });
+  const { recruiter, getRecruiterProfile, recruiterProfile } = useAuth();
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  // State for list inputs
-  const [skillInput, setSkillInput] = useState("");
-  const [partnerInput, setPartnerInput] = useState("");
-  const [certInput, setCertInput] = useState("");
+  const roleOptions = [
+    "Sr. Developers",
+    "Architects",
+    "Developers",
+    "Testers",
+    "Business Analysts",
+    "Infrastructure Professionals",
+    "Project Managers",
+    "UI Developers",
+    "Full Stack Developers",
+    "Java/Javascript Engineers",
+  ];
 
+  // ✅ Fetch recruiter profile
   useEffect(() => {
-    // Load existing profile data
-    if (user?.profile) {
-      setFormData(prev => ({ ...prev, ...user.profile }));
-    }
-  }, [user]);
+    const loadProfile = async () => {
+      try {
+        if (!recruiter?._id) {
+          setError("Recruiter not found. Please log in again.");
+          setLoading(false);
+          return;
+        }
 
+        let res;
+        try {
+          res = await getRecruiterProfile(recruiter._id);
+        } catch {
+          res = await getRecruiterProfile();
+        }
+
+        if (res && res.success && res.recruiter) {
+          setProfile({
+            ...res.recruiter,
+            ratecards:
+              res.recruiter.ratecards?.length > 0
+                ? res.recruiter.ratecards
+                : [{ role: "", lpa: "" }],
+            majorskillsarea: res.recruiter.majorskillsarea || [],
+          });
+        } else {
+          setError("Profile not found.");
+        }
+      } catch (err) {
+        console.error("Error fetching recruiter profile:", err);
+        setError("Failed to load recruiter profile.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProfile();
+  }, [recruiter, getRecruiterProfile]);
+
+  // ✅ Handle text inputs
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setProfile((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Helper for adding items to arrays (skills, partners, etc.)
-  const handleAddItem = (listName, input, setInput) => {
-    if (input.trim() && !formData[listName].includes(input.trim())) {
-      setFormData({
-        ...formData,
-        [listName]: [...formData[listName], input.trim()],
-      });
-      setInput("");
-    }
-  };
-
-  // Helper for removing items from arrays
-  const handleRemoveItem = (listName, itemToRemove) => {
-    setFormData({
-      ...formData,
-      [listName]: formData[listName].filter((item) => item !== itemToRemove),
+  // ✅ Handle checkbox skills
+  const handleCheckboxChange = (value) => {
+    setProfile((prev) => {
+      const updated = prev.majorskillsarea.includes(value)
+        ? prev.majorskillsarea.filter((skill) => skill !== value)
+        : [...prev.majorskillsarea, value];
+      return { ...prev, majorskillsarea: updated };
     });
   };
 
-  const handleSubmit = async (e) => {
+  // ✅ Ratecard modifications
+  const handleRatecardChange = (index, field, value) => {
+    const updated = [...profile.ratecards];
+    updated[index][field] = value;
+    setProfile((prev) => ({ ...prev, ratecards: updated }));
+  };
+
+  const addRatecard = () => {
+    setProfile((prev) => ({
+      ...prev,
+      ratecards: [...prev.ratecards, { role: "", lpa: "" }],
+    }));
+  };
+
+  const removeRatecard = (index) => {
+    const updated = [...profile.ratecards];
+    updated.splice(index, 1);
+    setProfile((prev) => ({ ...prev, ratecards: updated }));
+  };
+
+  // ✅ Save updated profile
+  const handleSave = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setMessage({ type: '', text: '' });
+    if (!profile) return;
+
+    setSaving(true);
+    setMessage("");
+    setError("");
 
     try {
-      // Use the general /api/profile route
-      const response = await api.put("/profile", formData); 
+      const allowedFields = [
+        "address",
+        "majorskillsarea",
+        "resumeskills",
+        "partnerships",
+        "companywebsite",
+        "companyphone",
+        "companyAddress",
+        "location",
+        "companycertifications",
+        "dunsnumber",
+        "numberofemployees",
+        "ratecards",
+      ];
 
-      updateUser(response.data.user); // Update context
-      setMessage({ type: "success", text: "Profile updated successfully!" });
-    } catch (error) {
-      setMessage({
-        type: "error",
-        text: error.response?.data?.message || "Failed to update profile",
-      });
+      const filtered = Object.keys(profile)
+        .filter((k) => allowedFields.includes(k))
+        .reduce((obj, key) => {
+          obj[key] = profile[key];
+          return obj;
+        }, {});
+
+      const res = await recruiterProfile(filtered);
+
+      if (res?.success) {
+        setMessage("✅ Profile updated successfully!");
+        setTimeout(() => navigate("/recruiter/profile/view"), 1500);
+      } else {
+        setError(res?.error || "Failed to update profile.");
+      }
+    } catch (err) {
+      console.error("Error updating profile:", err);
+      setError("An unexpected error occurred.");
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
+  if (loading) return <p className="loading-text">Loading recruiter profile...</p>;
+  if (error) return <p className="error-text">{error}</p>;
+  if (!profile) return null;
+
   return (
-    <div className="profile-edit-page">
-      <div className="profile-edit-container">
-        <h1>Edit Recruiter Profile</h1>
-        <p>This information will be visible to employers when you submit candidates.</p>
+    <div className="recruiter-profile-page">
+      <div className="recruiter-profile-card">
+        <h2 className="recruiter-profile-title">Edit Recruiter Profile</h2>
 
-        <form onSubmit={handleSubmit}>
-          
-          {/* Contact Info */}
-          <div className="profile-card">
-            <h2>Contact Information</h2>
-            <div className="form-row">
-              <div className="form-group">
-                <label>First Name</label>
-                <input type="text" name="firstName" value={formData.firstName || ''} onChange={handleChange} />
-              </div>
-              <div className="form-group">
-                <label>Last Name</label>
-                <input type="text" name="lastName" value={formData.lastName || ''} onChange={handleChange} />
-              </div>
-            </div>
-             <div className="form-group">
-                <label>Login Email</label>
-                <input type="email" name="email" value={user?.email || ''} disabled />
-              </div>
-             <div className="form-group">
-                <label>Phone Number</label>
-                <input type="tel" name="phone" value={formData.phone || ''} onChange={handleChange} />
-              </div>
+        <form onSubmit={handleSave} className="recruiter-profile-form">
+          {/* Address */}
+          <div className="form-group">
+            <label htmlFor="address">Address*</label>
+            <input
+              type="text"
+              id="address"
+              name="address"
+              value={profile.address || ""}
+              onChange={handleChange}
+            />
           </div>
 
-          {/* Company Info */}
-          <div className="profile-card">
-            <h2>Agency / Company Information</h2>
-            <div className="form-group">
-                <label>Agency Name</label>
-                <input type="text" name="agencyName" value={formData.agencyName || ''} onChange={handleChange} />
-              </div>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Company Website</label>
-                <input type="text" name="companyWebsite" value={formData.companyWebsite || ''} onChange={handleChange} />
-              </div>
-              <div className="form-group">
-                <label>Company Phone</label>
-                <input type="tel" name="companyPhone" value={formData.companyPhone || ''} onChange={handleChange} />
-              </div>
-            </div>
-            <div className="form-group">
-              <label>Company Address</label>
-              <input type="text" name="companyAddress" value={formData.companyAddress || ''} onChange={handleChange} />
-            </div>
-            <div className="form-group">
-              <label>Company Location (City, State)</label>
-              <input type="text" name="companyLocation" value={formData.companyLocation || ''} onChange={handleChange} />
-            </div>
-            <div className="form-row">
-               <div className="form-group">
-                <label>D-U-N-S® Number</label>
-                <input type="text" name="dunsNumber" value={formData.dunsNumber || ''} onChange={handleChange} />
-              </div>
-              <div className="form-group">
-                <label>Number of Employees</label>
-                <input type="number" name="employeeCount" value={formData.employeeCount || ''} onChange={handleChange} />
-              </div>
+          {/* Major Skills Area */}
+          <div className="form-group">
+            <label>Major Skills Area*</label>
+            <div className="skills-grid">
+              {["Development", "Testing", "Operations", "Business Analyst"].map((skill) => {
+                const isChecked = profile.majorskillsarea?.includes(skill);
+                return (
+                  <label key={skill} className={`skill-checkbox ${isChecked ? "checked" : ""}`}>
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={() => handleCheckboxChange(skill)}
+                    />
+                    <span>{skill}</span>
+                  </label>
+                );
+              })}
             </div>
           </div>
 
-          {/* Skills & Certifications */}
-          <div className="profile-card">
-            <h2>Specialties & Certifications</h2>
-            
-            {/* Major Skills */}
-            <div className="form-group">
-              <label>Major Skills Area (e.g., Development, Testing)</label>
-              <div className="list-input">
-                <input type="text" value={skillInput} onChange={(e) => setSkillInput(e.target.value)} placeholder="Add a skill area"/>
-                <button type="button" onClick={() => handleAddItem('majorSkills', skillInput, setSkillInput)} className="add-btn">Add</button>
-              </div>
-              <div className="item-list">
-                {formData.majorSkills && formData.majorSkills.map((skill, index) => (
-                  <span key={index} className="item-tag">{skill}
-                    <button type="button" onClick={() => handleRemoveItem('majorSkills', skill)} className="item-remove">×</button>
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Partnerships */}
-            <div className="form-group">
-              <label>Partnerships (e.g., Microsoft, AWS)</label>
-              <div className="list-input">
-                <input type="text" value={partnerInput} onChange={(e) => setPartnerInput(e.target.value)} placeholder="Add a partner"/>
-                <button type="button" onClick={() => handleAddItem('partnerships', partnerInput, setPartnerInput)} className="add-btn">Add</button>
-              </div>
-              <div className="item-list">
-                {formData.partnerships && formData.partnerships.map((item, index) => (
-                  <span key={index} className="item-tag">{item}
-                    <button type="button" onClick={() => handleRemoveItem('partnerships', item)} className="item-remove">×</button>
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Certifications */}
-            <div className="form-group">
-              <label>Company Certifications (e.g., Women Owned)</label>
-              <div className="list-input">
-                <input type="text" value={certInput} onChange={(e) => setCertInput(e.target.value)} placeholder="Add a certification"/>
-                <button type="button" onClick={() => handleAddItem('companyCertifications', certInput, setCertInput)} className="add-btn">Add</button>
-              </div>
-              <div className="item-list">
-                {formData.companyCertifications && formData.companyCertifications.map((item, index) => (
-                  <span key={index} className="item-tag">{item}
-                    <button type="button" onClick={() => handleRemoveItem('companyCertifications', item)} className="item-remove">×</button>
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-          
-          {/* Rate Card */}
-          <div className="profile-card">
-            <h2>Rate Card</h2>
-            <div className="form-group">
-              <label>Rate Card Details</label>
-              <textarea
-                name="rateCard"
-                value={formData.rateCard || ''}
+          {/* Other input fields */}
+          {[
+            { id: "resumeskills", label: "Resume Skills" },
+            { id: "partnerships", label: "Partnerships" },
+            { id: "companywebsite", label: "Company Website" },
+            { id: "companyphone", label: "Company Phone" },
+            { id: "companyAddress", label: "Company Address" },
+            { id: "location", label: "Location" },
+            { id: "companycertifications", label: "Company Certifications" },
+            { id: "numberofemployees", label: "Number of Employees" },
+            { id: "dunsnumber", label: "DUNS Number" },
+          ].map((field) => (
+            <div className="form-group" key={field.id}>
+              <label htmlFor={field.id}>{field.label}</label>
+              <input
+                type="text"
+                id={field.id}
+                name={field.id}
+                value={profile[field.id] || ""}
                 onChange={handleChange}
-                placeholder="List your rates for different roles, e.g., Sr. Developer: $100/hr, Architect: $120/hr..."
-                rows="8"
               />
             </div>
+          ))}
+
+          {/* Ratecards Section */}
+          <div className="form-group">
+            <label>Ratecards with Skills*</label>
+            {profile.ratecards.map((ratecard, index) => (
+              <div className="ratecard-entry" key={index}>
+                <div className="ratecard-row">
+                  <select
+                    value={ratecard.role}
+                    onChange={(e) => handleRatecardChange(index, "role", e.target.value)}
+                  >
+                    <option value="">Select Role</option>
+                    {roleOptions.map((role) => (
+                      <option key={role} value={role}>
+                        {role}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="number"
+                    placeholder="LPA"
+                    value={ratecard.lpa || ""}
+                    onChange={(e) => handleRatecardChange(index, "lpa", e.target.value)}
+                  />
+                  {profile.ratecards.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeRatecard(index)}
+                      className="ratecard-entry remove-btn"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+
+            <button type="button" onClick={addRatecard} className="recruiter-profile-btn save">
+              + Add Ratecard
+            </button>
           </div>
 
-          {message.text && (
-            <div className={`message-box ${message.type === "success" ? "success" : "error"}`}>
-              {message.text}
-            </div>
-          )}
+          {message && <p className="success-text">{message}</p>}
+          {error && <p className="error-text">{error}</p>}
 
-          <button type="submit" className="save-btn" disabled={loading}>
-            {loading ? "Saving..." : "Save Profile"}
-          </button>
+          <div className="button-group">
+            <button type="submit" disabled={saving} className="recruiter-profile-btn save">
+              {saving ? "Saving..." : "Save Changes"}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/recruiter/profile/view")}
+              className="recruiter-profile-btn cancel"
+            >
+              Cancel
+            </button>
+          </div>
         </form>
       </div>
     </div>

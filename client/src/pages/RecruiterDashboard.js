@@ -1,39 +1,60 @@
-// client/src/pages/RecruiterDashboard.js
-import React from 'react';
-import { Link } from 'react-router-dom';
-import './RecruiterDashboard.css';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import "./RecruiterDashboard.css";
 
 const RecruiterDashboard = () => {
-    return (
-        <div className="recruiter-dashboard">
-            <header className="dashboard-header">
-                <h1>Recruiter Dashboard</h1>
-                <p>Welcome, Recruiter! Manage your profile and submissions.</p>
-            </header>
-            
-            <div className="dashboard-widgets">
-                <Link to="/recruiter/profile/view" className="widget-card profile-card">
-                    <h3>View My Profile</h3>
-                    <p>See your public-facing agency profile.</p>
-                </Link>
-                
-                <Link to="/recruiter/profile/edit" className="widget-card profile-card-edit">
-                    <h3>Update Profile</h3>
-                    <p>Keep your agency details and skills up to date.</p>
-                </Link>
+  const { recruiter } = useAuth();
+  const navigate = useNavigate();
 
-                <Link to="/recruiter/submit-resume" className="widget-card submit-card">
-                    <h3>Submit Resume</h3>
-                    <p>Submit a new candidate for an open position.</p>
-                </Link>
-                
-                <Link to="/recruiter/submission-status" className="widget-card status-card">
-                    <h3>Submission Status</h3>
-                    <p>Track the status of all your submitted candidates.</p>
-                </Link>
+  const cards = [
+    {
+      title: "Create Profile",
+      desc: "Set up your recruiter profile to manage submissions.",
+      path: "/recruiter/profile",
+      btn: "Create Profile",
+    },
+    {
+      title: "Submit Resume",
+      desc: "Upload candidate resumes for review and tracking.",
+      path: "/recruiter/submit-resume",
+      btn: "Submit Resume",
+    },
+    {
+      title: "Submission Status",
+      desc: "Track your submitted resumes and their progress.",
+      path: "/recruiter/submission-status",
+      btn: "View Status",
+    },
+  ];
+
+  return (
+    <div className="recruiter-dashboard-page">
+      <div className="recruiter-dashboard-card-container">
+        <h2 className="recruiter-dashboard-title">
+          Welcome, {recruiter?.email || "Recruiter"}
+        </h2>
+        <p className="recruiter-dashboard-subtitle">
+          Your Smart Submissions Control Panel
+        </p>
+
+        <div className="recruiter-dashboard-grid">
+          {cards.map((card, index) => (
+            <div key={index} className="dashboard-card">
+              <h3>{card.title}</h3>
+              <p>{card.desc}</p>
+              <button
+                className="recruiter-dashboard-btn"
+                onClick={() => navigate(card.path)}
+              >
+                {card.btn}
+              </button>
             </div>
+          ))}
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default RecruiterDashboard;

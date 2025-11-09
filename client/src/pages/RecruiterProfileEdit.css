@@ -1,190 +1,252 @@
-/* client/src/pages/RecruiterProfileEdit.css */
-/* ✅ Theme: Using styles from existing Profile.css */
-.profile-edit-page {
-    min-height: 100vh;
-    width: 100%;
-    /* ✅ Theme: Set transparent bg, lets global #f0f2f5 show */
-    background-color: transparent; 
-    padding: 110px 20px 40px;
-    display: flex;
-    justify-content: center;
-    box-sizing: border-box;
+/* =========================================
+   SMART SUBMISSIONS — RECRUITER PROFILE EDIT
+   ========================================= */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+.recruiter-profile-edit-page {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background-color: #f9fafc;
+  min-height: 100vh;
+  padding: 60px 20px;
+  font-family: "Inter", sans-serif;
 }
 
-.profile-edit-container {
-    width: 900px;
-    max-width: 100%;
-    background: #fff;
-    padding: 30px;
-    border-radius: 12px;
-    border: 1px solid #ececec;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+/* --------------------------
+   Profile Container
+--------------------------- */
+.recruiter-profile-edit-container {
+  width: 100%;
+  max-width: 850px;
+  margin: 0 auto;
+  padding: 35px 45px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1.5px solid #e5e7eb;
 }
 
-.profile-edit-container h1 {
-    font-size: 28px;
-    font-weight: 650;
-    /* ✅ Theme: Set purple color */
-    color: #5b2eca;
-    text-align: center;
-    margin-bottom: 10px;
+.recruiter-profile-edit-container h2 {
+  text-align: center;
+  color: #4b0082;
+  font-weight: 700;
+  font-size: 1.6rem;
+  margin-bottom: 25px;
 }
 
-.profile-edit-container > p {
-    text-align: center;
-    font-size: 1rem;
-    color: #555;
-    margin-bottom: 25px;
-}
-
-.profile-card {
-    background: #ffffff;
-    border: 1px solid #e8e8e8;
-    padding: 18px;
-    border-radius: 10px;
-    margin-bottom: 18px;
-}
-
-.profile-card h2 {
-    font-size: 18px;
-    font-weight: 600;
-    /* ✅ Theme: Set purple color */
-    color: #5b2eca;
-    margin-bottom: 12px;
+/* --------------------------
+   Form Layout
+--------------------------- */
+.recruiter-profile-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
 }
 
 .form-group {
-    margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
 }
 
 .form-group label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 6px;
-    color: #333;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
 }
 
-.form-group input,
-.form-group textarea {
+/* --------------------------
+   Input Styling
+--------------------------- */
+.form-group input {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1.5px solid #ccc;
+  transition: all 0.2s ease-in-out;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.form-group input:focus {
+  border-color: #6d28d9;
+  outline: none;
+  box-shadow: 0 0 4px rgba(109, 40, 217, 0.25);
+}
+
+/* --------------------------
+   Dropdown (Select)
+--------------------------- */
+.recruiter-rate-card-row select,
+.form-group select {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1.5px solid #ccc;
+  background-color: #fff;
+  font-size: 1rem;
+  width: 100%;
+  color: #333;
+  transition: all 0.2s ease-in-out;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg fill='%234b0082' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 18px;
+}
+
+.recruiter-rate-card-row select:focus,
+.form-group select:focus {
+  border-color: #6d28d9;
+  box-shadow: 0 0 4px rgba(109, 40, 217, 0.25);
+  outline: none;
+}
+
+/* Ensure dropdown shows above all */
+select option {
+  background-color: #fff;
+  color: #333;
+  padding: 8px;
+}
+
+/* --------------------------
+   Rate Card Rows
+--------------------------- */
+.recruiter-rate-card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  padding: 16px 20px;
+  background-color: #faf5ff;
+  border-radius: 10px;
+  border: 1.5px solid #e5e7eb;
+  margin-bottom: 12px;
+}
+
+.recruiter-rate-card-row input {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1.5px solid #ccc;
+  font-size: 1rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.recruiter-rate-card-row input:focus {
+  border-color: #6d28d9;
+  box-shadow: 0 0 4px rgba(109, 40, 217, 0.25);
+  outline: none;
+}
+
+/* --------------------------
+   Skill Checkboxes
+--------------------------- */
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.skill-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  cursor: pointer;
+  background-color: #f9fafb;
+  transition: all 0.2s ease;
+}
+
+.skill-checkbox.checked {
+  border-color: #6d28d9;
+  background-color: #f3e8ff;
+}
+
+.skill-checkbox:hover {
+  background-color: #f3e8ff;
+}
+
+/* --------------------------
+   Buttons
+--------------------------- */
+.recruiter-profile-edit-btn {
+  margin-top: 10px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.recruiter-profile-edit-btn.save {
+  background-color: #6d28d9;
+  color: #fff;
+}
+
+.recruiter-profile-edit-btn.save:hover {
+  background-color: #5b21b6;
+}
+
+.recruiter-profile-edit-btn.cancel {
+  background-color: #e5e7eb;
+  color: #111;
+}
+
+.recruiter-profile-edit-btn.cancel:hover {
+  background-color: #d1d5db;
+}
+
+/* Remove button in ratecards */
+.ratecard-entry .remove-btn {
+  background-color: #e11d48;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.ratecard-entry .remove-btn:hover {
+  background-color: #be123c;
+}
+
+/* --------------------------
+   Messages
+--------------------------- */
+.success-message {
+  color: #4b0082;
+  font-weight: 600;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.error-text {
+  color: #dc2626;
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+/* --------------------------
+   Responsive
+--------------------------- */
+@media (max-width: 768px) {
+  .recruiter-profile-edit-container {
+    padding: 25px;
+  }
+
+  .recruiter-rate-card-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .recruiter-profile-edit-btn {
     width: 100%;
-    padding: 12px;
-    border: 1px solid #cfcfe8; /* ✅ Theme: Purple-tinted border */
-    border-radius: 8px;
-    font-size: 15px;
-    transition: .2s;
-    box-sizing: border-box;
-}
-
-.form-group input:focus,
-.form-group textarea:focus {
-    /* ✅ Theme: Purple focus */
-    border-color: #5b2eca;
-    box-shadow: 0 0 6px rgba(91,46,202,0.3);
-    outline: none;
-}
-
-.form-group input:disabled {
-    background: #f4f4f4;
-    cursor: not-allowed;
-}
-
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-}
-
-.list-input {
-    display: flex;
-    gap: 10px;
-}
-.list-input input {
-    flex-grow: 1;
-}
-
-.add-btn {
-    /* ✅ Theme: Match 'add-skill-btn' */
-    background: linear-gradient(90deg, #5b2eca, #8a4ff2);
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-    font-size: 15px;
-}
-.add-btn:hover { opacity: .9; }
-
-.item-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 10px;
-}
-
-.item-tag {
-    /* ✅ Theme: Match 'skill-tag' */
-    background: #6a43ff;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 14px;
-    color: #fff;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin: 4px;
-}
-
-.item-remove {
-    /* ✅ Theme: Match 'skill-remove' */
-    border: none;
-    background: none;
-    color: white;
-    cursor: pointer;
-    font-size: 18px;
-    line-height: 1;
-}
-.item-remove:hover {
-    opacity: 0.8;
-}
-
-.message-box {
-    padding: 15px;
-    border-radius: 6px;
-    margin: 15px 0;
-    font-weight: 500;
-    text-align: center;
-}
-.message-box.success {
-    background: #d4edda;
-    color: #155724;
-}
-.message-box.error {
-    background: #f8d7da;
-    color: #721c24;
-}
-
-.save-btn {
-    /* ✅ Theme: Match 'btn-primary' */
-    background: linear-gradient(90deg, #5b2eca, #8a4ff2);
-    border: none;
-    padding: 14px;
-    width: 100%;
-    border-radius: 10px;
-    color: white;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 10px;
-}
-.save-btn:hover { opacity: .9; }
-.save-btn:disabled {
-    background: #aaa;
-    cursor: not-allowed;
-}
-
-@media (max-width: 600px) {
-    .form-row {
-        grid-template-columns: 1fr;
-    }
+  }
 }

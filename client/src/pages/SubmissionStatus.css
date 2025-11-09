@@ -1,114 +1,168 @@
-/* client/src/pages/SubmissionStatus.css */
-/* ✅ Theme: Using styles from existing CandidateList.css */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
 .submission-status-page {
-    min-height: 100vh;
-    width: 100%;
-    /* ✅ Theme: Set soft lavender background */
-    background-color: var(--color-bg-soft, #faf5ff);
-    padding: 110px 20px 40px;
-    box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+  background-color: #f9fafc;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 60px 20px;
 }
 
-.status-container {
-    max-width: 1000px;
-    margin: 0 auto;
-    background: #fff;
-    padding: 30px;
-    border-radius: 12px;
-    /* ✅ Theme: Match table shadow */
-    box-shadow: var(--shadow-main, 0 4px 12px rgba(91, 33, 182, 0.08));
+.submission-status-card {
+  background: #fff;
+  width: 100%;
+  max-width: 900px;
+  padding: 40px 50px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e5e7eb;
 }
 
-.status-container h1 {
-    font-size: 30px;
-    font-weight: 700;
-    /* ✅ Theme: Set deep purple color */
-    color: var(--color-primary-deep, #5b21b6);
-    text-align: center;
-    margin-bottom: 10px;
+.submission-status-title {
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1.8rem;
 }
 
-.status-container > p {
-    text-align: center;
-    font-size: 16px;
-    /* ✅ Theme: Set muted text color */
-    color: var(--color-text-muted, #6b7280);
-    margin-bottom: 30px;
+.submission-status-search {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 24px;
 }
 
-.loading-text,
-.error-text,
-.empty-text {
-    text-align: center;
-    font-size: 1rem;
-    padding: 40px;
-    color: var(--color-primary-action-hover, #7c3aed);
-    font-style: italic;
-    font-weight: 500;
+.submission-status-input {
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  background: #f9fafb;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.error-text {
-    color: #b91c1c;
+.submission-status-input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+  outline: none;
 }
 
-.status-table-container {
-    overflow-x: auto;
+.submission-status-btn {
+  background-color: #7c3aed;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
-.status-table {
-    width: 100%;
-    border-collapse: collapse;
+.submission-status-btn:hover {
+  background-color: #5b21b6;
 }
 
-.status-table th,
-.status-table td {
-    padding: 14px 18px;
-    text-align: left;
-    font-size: 0.95rem;
-    border-bottom: 1px solid #f3e8ff;
+.submission-status-table-wrapper {
+  overflow-x: auto;
 }
 
-.status-table th {
-    /* ✅ Theme: Match table header */
-    background: var(--color-bg-light, #f3e8ff);
-    color: var(--color-primary-deep, #5b21b6);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+.submission-status-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
-.status-table tbody tr:nth-child(even) {
-    background-color: var(--color-bg-row-even, #faf5ff);
+.submission-status-table th,
+.submission-status-table td {
+  padding: 14px 18px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.95rem;
 }
 
-.status-table tbody tr:hover {
-    background-color: var(--color-bg-row-hover, #f5f3ff);
+.submission-status-table th {
+  background-color: #f3f4f6;
+  color: #111827;
+  font-weight: 600;
 }
 
 .status-badge {
-    padding: 4px 10px;
-    border-radius: 10px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-transform: capitalize;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.85rem;
 }
 
-/* ✅ Theme: Match badges from CandidateHistory.css */
-.status-badge.submitted, 
-.status-badge.scheduled, 
-.status-badge.pending,
-.status-badge.under-review,
-.status-badge.reviewed,
-.status-badge.interviewed {
-  background-color: #e0e7ff; color: #3730a3;
+.status-badge.submitted {
+  background-color: #ede9fe;
+  color: #5b21b6;
 }
-.status-badge.shortlisted, 
-.status-badge.pass, 
-.status-badge.completed,
-.status-badge.hired {
-  background-color: #d1fae5; color: #065f46;
+
+.status-badge.reviewed {
+  background-color: #dcfce7;
+  color: #166534;
 }
-.status-badge.rejected, 
-.status-badge.fail {
-  background-color: #fee2e2; color: #991b1b;
+
+.status-badge.rejected {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+.submission-status-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+
+.submission-status-view,
+.submission-status-download,
+.submission-status-delete {
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-right: 6px;
+  transition: background-color 0.2s ease;
+  color: #fff;
+}
+
+.submission-status-view,
+.submission-status-download {
+  background-color: #7c3aed;
+}
+
+.submission-status-view:hover,
+.submission-status-download:hover {
+  background-color: #5b21b6;
+}
+
+.submission-status-delete {
+  background-color: #ef4444;
+}
+
+.submission-status-delete:hover {
+  background-color: #b91c1c;
+}
+
+@media (max-width: 640px) {
+  .submission-status-card {
+    padding: 28px 24px;
+  }
+
+  .submission-status-title {
+    font-size: 1.4rem;
+  }
+
+  .submission-status-table th,
+  .submission-status-table td {
+    font-size: 0.85rem;
+    padding: 10px;
+  }
 }

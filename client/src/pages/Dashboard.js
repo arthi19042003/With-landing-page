@@ -1,3 +1,4 @@
+// client/src/pages/Dashboard.js
 import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -64,14 +65,16 @@ const Dashboard = () => {
               </Link>
             </div>
 
+            {/* ❌ REMOVED: This card was linking to the Hiring Manager's schedule */}
+            {/*
             <div className="dashboard-card">
               <h3>Interview Management</h3>
               <p>Schedule and review candidate interviews</p>
-              {/* ✅ FIX: Changed link to the admin interview page */}
               <Link to="/hiring-manager/schedule">
                 <button className="purple-btn">Manage Interviews</button>
               </Link>
             </div>
+            */}
           </>
         )}
         
@@ -89,7 +92,7 @@ const Dashboard = () => {
             <div className="dashboard-card">
               <h3>Submit Candidate</h3>
               <p>Submit a new candidate for an open position</p>
-              <Link to="/recruiter/submit">
+              <Link to="/recruiter/submit-resume"> {/* ✅ FIX: Corrected link from /submit to /submit-resume */}
                 <button className="purple-btn">Submit Candidate</button>
               </Link>
             </div>

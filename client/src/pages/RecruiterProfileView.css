@@ -1,197 +1,132 @@
-/* client/src/pages/RecruiterProfileView.css */
-.profile-view-page {
-    min-height: 100vh;
-    width: 100%;
-    /* ✅ Theme: Set soft lavender background */
-    background-color: #faf5ff;
-    padding: 110px 20px 40px;
-    box-sizing: border-box;
+/* =========================================
+   SMART SUBMISSIONS — RECRUITER PROFILE VIEW
+   ========================================= */
+
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap");
+
+.recruiter-profile-view-page {
+  font-family: "Poppins", sans-serif;
+  background-color: #f9fafc;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 60px 20px;
 }
 
-.profile-view-container {
-    max-width: 1000px;
-    margin: 0 auto;
+/* Profile Card */
+.recruiter-profile-card {
+  width: 100%;
+  max-width: 850px;
+  background-color: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 40px 50px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  animation: fadeIn 0.4s ease-in-out;
 }
 
-.profile-view-header {
-    background: #fff;
-    padding: 30px;
-    border-radius: 14px;
-    /* ✅ Theme: Match 'history-card' shadow/border */
-    box-shadow: 0 4px 12px rgba(91, 33, 182, 0.08);
-    border: 1.5px solid #ede9fe;
-    text-align: center;
-    margin-bottom: 25px;
-    position: relative;
+/* Title */
+.recruiter-profile-title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #4b0082;
+  text-align: center;
+  margin-bottom: 24px;
 }
 
-.profile-view-header h1 {
-    font-size: 2.5rem;
-    /* ✅ Theme: Set deep purple color */
-    color: #5b21b6;
-    margin: 0 0 5px;
+/* Info Section */
+.recruiter-profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.profile-view-header p {
-    font-size: 1.2rem;
-    color: #666;
-    margin: 0;
+/* Field Group */
+.form-group {
+  margin-bottom: 10px;
 }
 
-.profile-btn {
-    display: inline-block;
-    padding: 10px 20px;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: 600;
-    transition: background-color 0.2s;
+.form-group label {
+  display: block;
+  font-weight: 500;
+  color: #111827;
+  margin-bottom: 4px;
 }
 
-.edit-btn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    /* ✅ Theme: Match purple button */
-    background: #7c3aed;
-    color: white;
-}
-.edit-btn:hover {
-    background: #6d28d9;
+.form-group p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #374151;
+  background-color: #f9fafc;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
 }
 
-.profile-view-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 25px;
-    margin-bottom: 25px;
+/* Ratecards */
+.ratecard-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
-.profile-view-card {
-    background: #fff;
-    padding: 25px;
-    border-radius: 14px;
-    /* ✅ Theme: Match 'history-card' shadow/border */
-    box-shadow: 0 4px 12px rgba(91, 33, 182, 0.08);
-    border: 1.5px solid #ede9fe;
+.ratecard-list li {
+  padding: 8px 10px;
+  background-color: #f9f5ff;
+  border-radius: 6px;
+  border: 1px solid #ede9fe;
+  color: #4b0082;
+  margin-bottom: 6px;
+  font-size: 0.95rem;
 }
 
-.profile-view-card h2 {
-    font-size: 1.5rem;
-    /* ✅ Theme: Match 'history-card' h3 */
-    color: #4c1d95;
-    margin-top: 0;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
+/* Button */
+.button {
+  margin-top: 30px;
+  background: linear-gradient(90deg, #5b21b6, #7c3aed);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 12px rgba(124, 58, 237, 0.25);
 }
 
-.details-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+.button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
 }
 
-.details-list li {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid #f4f4f4;
-    font-size: 1rem;
+/* Loading State */
+.loading-text {
+  font-size: 1rem;
+  color: #4b0082;
+  margin-top: 80px;
 }
 
-.details-list li:last-child {
-    border-bottom: none;
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.details-list strong {
-    /* ✅ Theme: Match 'details-grid' strong */
-    color: #6d28d9;
-    font-weight: 600;
-    margin-right: 15px;
-}
+/* Responsive */
+@media (max-width: 768px) {
+  .recruiter-profile-card {
+    padding: 24px;
+  }
 
-.details-list span {
-    color: #333;
-    text-align: right;
-}
-
-.details-list a {
-    color: #6d28d9;
-    text-decoration: none;
-}
-.details-list a:hover {
-    text-decoration: underline;
-}
-
-.list-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #4c1d95;
-    margin-top: 20px;
-    margin-bottom: 10px;
-}
-
-.tag-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.tag {
-    /* ✅ Theme: Match 'skill-tag' */
-    background: #ede9fe;
-    color: #5b21b6;
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-
-.tag.partner {
-    background: #f3e8ff;
-    color: #4c1d95;
-}
-
-.tag.cert {
-    background: #eef2ff;
-    color: #4338ca;
-}
-
-.tag-list p {
-    font-style: italic;
-    color: #777;
-    font-size: 0.9rem;
-}
-
-.rate-card {
-    background: #fff;
-    padding: 25px;
-    border-radius: 14px;
-    box-shadow: 0 4px 12px rgba(91, 33, 182, 0.08);
-    border: 1.5px solid #ede9fe;
-}
-.rate-card h2 {
-    font-size: 1.5rem;
-    color: #4c1d95;
-    margin-top: 0;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
-}
-.rate-card pre {
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    font-family: monospace;
-    font-size: 1rem;
-    color: #333;
-    background: #faf5ff;
-    padding: 15px;
-    border-radius: 6px;
-    border: 1px solid #f0f0f0;
-}
-
-@media (max-width: 900px) {
-    .profile-view-grid {
-        grid-template-columns: 1fr;
-    }
+  .recruiter-profile-title {
+    font-size: 1.4rem;
+  }
 }

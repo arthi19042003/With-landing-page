@@ -13,8 +13,13 @@ const Interviews = () => {
       setLoading(true);
       setError('');
       try {
-        // Fetch from the endpoint defined in manager.js for interviews
-        const response = await api.get("/manager/interviews");
+        // ✅ FIX: Changed from "/manager/interviews" to "/interviews"
+        // This now correctly calls the /api/interviews endpoint
+        const response = await api.get("/interviews"); 
+        
+        // Note: This endpoint currently returns ALL interviews.
+        // For a real-world scenario, you would update server/routes/interviewRoutes.js
+        // to filter by req.userId to only return interviews for the logged-in candidate.
         setInterviews(response.data);
       } catch (err) {
         console.error("Error fetching interviews:", err);
@@ -82,7 +87,7 @@ const Interviews = () => {
             <div key={interview._id} className="interview-card">
               <div className="interview-header">
                  {/* Use candidateName from transformed data */}
-                <h3>{interview.candidateName || 'Unknown Candidate'}</h3>
+                <h3>{interview.candidateName || interview.candidate?.firstName || 'Unknown Candidate'}</h3>
                  {/* Display Position Title if available */}
                  {interview.positionTitle && <span className="role">{interview.positionTitle}</span>}
               </div>

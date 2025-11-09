@@ -1,157 +1,96 @@
-// client/src/pages/RecruiterProfileView.js
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
-import api from '../api/axios';
-import './RecruiterProfileView.css';
+import React, { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import "./RecruiterProfileView.css";
 
 const RecruiterProfileView = () => {
-    const { user } = useAuth();
-    const [profile, setProfile] = useState(null);
-    const [loading, setLoading] = useState(true);
+  const { recruiter, getRecruiterProfile } = useAuth();
+  const [profile, setProfile] = useState(null);
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        const fetchProfile = async () => {
-            if (user?.profile) {
-                // Use profile from context if available
-                setProfile(user.profile);
-                setLoading(false);
-            } else if (user) {
-                // Fetch profile if not in context
-                try {
-                    const response = await api.get('/profile');
-                    setProfile(response.data.user.profile);
-                } catch (error) {
-                    console.error("Error fetching profile", error);
-                } finally {
-                    setLoading(false);
-                }
-            } else {
-                setLoading(false);
-            }
-        };
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (recruiter?._id) {
+        const res = await getRecruiterProfile(recruiter._id);
+        if (res.success) setProfile(res.recruiter);
+      }
+    };
+    loadProfile();
+  }, [recruiter, getRecruiterProfile]);
 
-        fetchProfile();
-    }, [user]);
-
-    if (loading) {
-        return <div className="profile-view-page"><p>Loading profile...</p></div>;
-    }
-
-    if (!profile) {
-        return (
-            <div className="profile-view-page">
-                <h2>Profile Not Found</h2>
-                <p>You haven't set up your recruiter profile yet.</p>
-                <Link to="/recruiter/profile/edit" className="profile-btn edit-btn">
-                    Create Profile
-                </Link>
-            </div>
-        );
-    }
-
-    const {
-        agencyName,
-        firstName,
-        lastName,
-        phone,
-        companyWebsite,
-        companyPhone,
-        companyAddress,
-        companyLocation,
-        dunsNumber,
-        employeeCount,
-        rateCard,
-        majorSkills = [],
-        partnerships = [],
-        companyCertifications = []
-    } = profile;
-
+  if (!profile)
     return (
-        <div className="profile-view-page">
-            <div className="profile-view-container">
-                <div className="profile-view-header">
-                    <h1>{agencyName || `${firstName} ${lastName}`}</h1>
-                    <p>{companyLocation || 'Location not set'}</p>
-                    <Link to="/recruiter/profile/edit" className="profile-btn edit-btn">
-                        Edit Profile
-                    </Link>
-                </div>
-
-                <div className="profile-view-grid">
-                    {/* Column 1: Contact & Details */}
-                    <div className="profile-view-card">
-                        <h2>Agency Details</h2>
-                        <ul className="details-list">
-                            <li>
-                                <strong>Contact:</strong>
-                                <span>{firstName} {lastName}</span>
-                            </li>
-                            <li>
-                                <strong>Email:</strong>
-                                <span>{user.email}</span>
-                            </li>
-                            <li>
-                                <strong>Phone:</strong>
-                                <span>{phone || companyPhone || 'N/A'}</span>
-                            </li>
-                            <li>
-                                <strong>Website:</strong>
-                                <span>
-                                    {companyWebsite ? 
-                                        <a href={companyWebsite} target="_blank" rel="noopener noreferrer">{companyWebsite}</a> 
-                                        : 'N/A'}
-                                </span>
-                            </li>
-                             <li>
-                                <strong>Address:</strong>
-                                <span>{companyAddress || 'N/A'}</span>
-                            </li>
-                            <li>
-                                <strong>DUNS:</strong>
-                                <span>{dunsNumber || 'N/A'}</span>
-                            </li>
-                             <li>
-                                <strong>Employees:</strong>
-                                <span>{employeeCount || 'N/A'}</span>
-                            </li>
-                        </ul>
-                    </div>
-
-                    {/* Column 2: Specialties & Rate Card */}
-                    <div className="profile-view-card">
-                        <h2>Specialties</h2>
-                        <h3 className="list-title">Major Skill Areas</h3>
-                        <div className="tag-list">
-                            {majorSkills.length > 0 ? 
-                                majorSkills.map(skill => <span key={skill} className="tag">{skill}</span>) 
-                                : <p>No skills listed.</p>}
-                        </div>
-
-                        <h3 className="list-title">Partnerships</h3>
-                        <div className="tag-list">
-                             {partnerships.length > 0 ? 
-                                partnerships.map(p => <span key={p} className="tag partner">{p}</span>) 
-                                : <p>No partnerships listed.</p>}
-                        </div>
-
-                         <h3 className="list-title">Certifications</h3>
-                        <div className="tag-list">
-                             {companyCertifications.length > 0 ? 
-                                companyCertifications.map(c => <span key={c} className="tag cert">{c}</span>) 
-                                : <p>No certifications listed.</p>}
-                        </div>
-                    </div>
-                </div>
-
-                <div className="profile-view-card rate-card">
-                    <h2>Rate Card</h2>
-                    <pre>{rateCard || 'No rate card details provided.'}</pre>
-                </div>
-
-            </div>
-        </div>
+      <div className="recruiter-profile-view-page text-center">
+        <p className="loading-text">Loading profile...</p>
+      </div>
     );
+
+  return (
+    <div className="recruiter-profile-view-page">
+      <div className="recruiter-profile-card">
+        <h2 className="recruiter-profile-title">Recruiter Profile</h2>
+
+        <div className="recruiter-profile-info">
+          <ProfileField label="Address" value={profile.address} />
+          <ProfileField
+            label="Major Skills Area"
+            value={
+              Array.isArray(profile.majorskillsarea)
+                ? profile.majorskillsarea.join(", ")
+                : profile.majorskillsarea
+            }
+          />
+          <ProfileField label="Resume Skills" value={profile.resumeskills} />
+          <ProfileField label="Partnerships" value={profile.partnerships} />
+          <ProfileField label="Company Website" value={profile.companywebsite} />
+          <ProfileField label="Company Phone" value={profile.companyphone} />
+          <ProfileField label="Company Address" value={profile.companyAddress} />
+          <ProfileField label="Location" value={profile.location} />
+          <ProfileField
+            label="Company Certifications"
+            value={profile.companycertifications}
+          />
+          <ProfileField label="DUNS Number" value={profile.dunsnumber} />
+          <ProfileField
+            label="Number of Employees"
+            value={profile.numberofemployees}
+          />
+
+          <div className="form-group">
+            <label>Ratecards:</label>
+            {profile.ratecards && profile.ratecards.length > 0 ? (
+              <ul className="ratecard-list">
+                {profile.ratecards.map((card, i) => (
+                  <li key={i}>
+                    <strong>{card.role}</strong> — {card.lpa} LPA
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>—</p>
+            )}
+          </div>
+        </div>
+
+        <div className="actions text-center">
+          <button
+            onClick={() => navigate("/recruiter/profile/edit")}
+            className="button"
+          >
+            Edit Profile
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
+
+// ✅ Helper subcomponent for readability
+const ProfileField = ({ label, value }) => (
+  <div className="form-group">
+    <label>{label}:</label>
+    <p>{value || "—"}</p>
+  </div>
+);
 
 export default RecruiterProfileView;
