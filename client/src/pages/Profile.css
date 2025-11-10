@@ -2,18 +2,17 @@
 .profile-page-bg {
   min-height: 100vh;
   width: 100%;
-  /* ✅ FIX: Removed background image */
   background-color: transparent; 
-  padding: 110px 20px 40px; /* ✅ MODIFIED: Increased top padding */
+  padding: 110px 20px 40px;
   display: flex;
   justify-content: center;
-  box-sizing: border-box; /* ✅ ADDED */
+  box-sizing: border-box;
 }
 
 /* Profile Content Box */
 .profile-container {
   width: 900px;
-  max-width: 100%; /* ✅ Added for responsiveness */
+  max-width: 100%;
   background: #fff;
   padding: 30px;
   border-radius: 12px;
@@ -51,26 +50,31 @@
 }
 
 /* Input fields */
-input, textarea, select { /* ✅ Added select */
+/* ✅ FIX 1: Exclude checkboxes from width: 100% */
+.profile-container input:not([type="checkbox"]):not([type="radio"]), 
+.profile-container textarea, 
+.profile-container select {
   width: 100%;
   padding: 12px;
   border: 1px solid #cfcfe8;
   border-radius: 8px;
   font-size: 15px;
   transition: .2s;
-  box-sizing: border-box; /* ✅ Added box-sizing */
+  box-sizing: border-box;
 }
 
-input:focus, textarea:focus, select:focus {
+.profile-container input:focus, 
+.profile-container textarea:focus, 
+.profile-container select:focus {
   border-color: #5b2eca;
   box-shadow: 0 0 6px rgba(91,46,202,0.3);
-  outline: none; /* ✅ Added outline */
+  outline: none;
 }
 
 /* Two column fields */
 .form-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* ✅ Responsive columns */
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 14px;
 }
 
@@ -79,68 +83,116 @@ input:focus, textarea:focus, select:focus {
   display: flex;
   gap: 10px;
 }
-/* ✅ Make input flexible */
 .skills-input input {
   flex-grow: 1;
 }
 
-.skill-tag {
-  background: #6a43ff;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 14px;
-  color: #fff;
+.profile-container .skill-tag {
+  background: #f3efff; 
+  padding: 5px 10px; 
+  border-radius: 16px; 
+  font-size: 13px; 
+  color: #5b2eca; 
+  border: 1px solid #e0d7ff; 
   display: inline-flex;
   align-items: center;
   gap: 6px;
   margin: 4px;
+  font-weight: 500;
 }
 
-.skill-remove {
+.profile-container .skill-remove {
   border: none;
   background: none;
-  color: white;
+  color: #5b2eca; 
   cursor: pointer;
-  font-size: 18px;
-  line-height: 1; /* ✅ Added */
+  font-size: 16px; 
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.skill-remove:hover {
+  opacity: 1;
 }
 
 /* Add Skill Button */
 .add-skill-btn {
   background: linear-gradient(90deg, #5b2eca, #8a4ff2);
   border: none;
-  padding: 10px 20px; /* ✅ Added padding */
+  padding: 10px 20px;
   border-radius: 8px;
   color: white;
   font-weight: 600;
   cursor: pointer;
-  font-size: 15px; /* ✅ Added */
+  font-size: 15px;
 }
 .add-skill-btn:hover { opacity: .9; }
 
 /* Save Button */
-.btn-primary {
+.profile-container .btn-primary {
   background: linear-gradient(90deg, #5b2eca, #8a4ff2);
   border: none;
   padding: 14px;
-  width: 100%;
-  border-radius: 10px;
+  width: 85%;
+  display: block; 
+  margin-left: auto; 
+  margin-right: auto; 
+  border-radius: 8px; 
   color: white;
-  font-size: 16px;
+  font-size: 15px; 
   font-weight: 600;
   cursor: pointer;
-  margin-top: 10px; /* ✅ Added margin */
+  margin-top: 10px;
+  margin-bottom: 18px; 
 }
-.btn-primary:hover { opacity: .9; }
 
-/* ✅ --- NEW STYLES for Exp/Edu --- */
+.profile-container .btn-primary:hover { opacity: .9; }
+
+/* --- STYLES for Validation --- */
+
+.form-group label .mandatory,
+.profile-item-editor label .mandatory {
+  color: #dc2626; /* red */
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+/* Red border and background for invalid inputs */
+.profile-container input.error,
+.profile-container textarea.error {
+  border-color: #dc2626 !important;
+  background-color: #fee2e2 !important;
+}
+
+.profile-container input.error:focus,
+.profile-container textarea.error:focus {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 6px rgba(220, 38, 38, 0.3) !important;
+}
+
+/* Small error text below an input */
+.error-text {
+  color: #dc2626;
+  font-size: 0.85rem;
+  margin-top: 4px;
+  display: block;
+}
+
+/* --- END Validation --- */
+
 
 .form-message {
-  padding: 12px;
+  padding: 10px; 
   border-radius: 8px;
-  margin: 15px 0;
+  margin-bottom: 10px; 
   font-weight: 500;
+  font-size: 14px; 
+  text-align: center;
+  width: 85%;
+  margin-left: auto;
+  margin-right: auto;
 }
+
 .form-message.success {
   background: #d7f7e0;
   color: #155724;
@@ -155,6 +207,11 @@ input:focus, textarea:focus, select:focus {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
+}
+
+/* ✅ FIX 2: Remove bottom margin from h2 inside a section-header */
+.section-header h2 {
+  margin-bottom: 0;
 }
 
 .btn-add-section {
@@ -184,6 +241,24 @@ input:focus, textarea:focus, select:focus {
 .profile-item-editor textarea {
   background: #fdfcff;
 }
+
+/* ✅ FIX 1: Checkbox Alignment Fix */
+.profile-item-editor label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #333;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px; /* Adds space between checkbox and text */
+}
+
+.profile-item-editor input[type="checkbox"] {
+  width: auto; /* Overrides the 'width: 100%' */
+  margin: 0;
+}
+/* ✅ END: Checkbox Alignment Fix */
+
 
 .btn-save-item {
   background: #4f46e5;

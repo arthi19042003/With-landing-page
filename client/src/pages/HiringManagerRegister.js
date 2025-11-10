@@ -1,4 +1,3 @@
-// client/src/pages/HiringManagerRegister.js
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -10,21 +9,42 @@ export default function HiringManagerRegister() {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const [errors, setErrors] = useState({}); // ✅ For field validation
   
-  // ✅ FIX: Get both register and logout from useAuth
+  const navigate = useNavigate();
   const { register, logout } = useAuth(); 
 
-  const handleChange = (e) => setForm({...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm({...form, [name]: value });
+    if (errors[name]) setErrors(p => ({ ...p, [name]: null }));
+  };
+
+  // ✅ Validation function
+  const validate = () => {
+    const newErrors = {};
+    if (!form.firstName) newErrors.firstName = "First Name is required";
+    if (!form.lastName) newErrors.lastName = "Last Name is required";
+    if (!form.companyName) newErrors.companyName = "Company Name is required";
+    if (!form.email) newErrors.email = "Email is required";
+    if (!form.phone) newErrors.phone = "Phone is required";
+    if (!form.password) newErrors.password = "Password is required";
+    if (!form.confirmPassword) newErrors.confirmPassword = "Confirm Password is required";
+    
+    if (form.password && form.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+    if (form.password && form.confirmPassword && form.password !== form.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    
-    if (form.password !== form.confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
+    if (!validate()) return; // ✅ Run validation
     
     setLoading(true);
     
@@ -40,9 +60,8 @@ export default function HiringManagerRegister() {
     
     setLoading(false);
 
-    // ✅ FIX: Changed navigation logic
     if (result.success) {
-      logout(); // Log out to clear any session
+      logout(); 
       navigate("/login/hiring-manager", { 
         state: { message: "Registration successful! Please log in." } 
       });
@@ -58,32 +77,32 @@ export default function HiringManagerRegister() {
         
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>First Name *</label>
-            <input name="firstName" value={form.firstName} onChange={handleChange} placeholder="First name" required/>
+            <label>First Name<span className="mandatory">*</span></label>
+            <input name="firstName" value={form.firstName} onChange={handleChange} placeholder="First name" required className={errors.firstName ? "error" : ""} />
           </div>
           <div className="form-group">
-            <label>Last Name *</label>
-            <input name="lastName" value={form.lastName} onChange={handleChange} placeholder="Last name" required/>
+            <label>Last Name<span className="mandatory">*</span></label>
+            <input name="lastName" value={form.lastName} onChange={handleChange} placeholder="Last name" required className={errors.lastName ? "error" : ""} />
           </div>
           <div className="form-group">
-            <label>Company *</label>
-            <input name="companyName" value={form.companyName} onChange={handleChange} placeholder="Company" required/>
+            <label>Company<span className="mandatory">*</span></label>
+            <input name="companyName" value={form.companyName} onChange={handleChange} placeholder="Company" required className={errors.companyName ? "error" : ""} />
           </div>
           <div className="form-group">
-            <label>Email *</label>
-            <input name="email" value={form.email} onChange={handleChange} placeholder="Email" type="email" required/>
+            <label>Email<span className="mandatory">*</span></label>
+            <input name="email" value={form.email} onChange={handleChange} placeholder="Email" type="email" required className={errors.email ? "error" : ""} />
           </div>
           <div className="form-group">
-            <label>Phone *</label>
-            <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone" required/>
+            <label>Phone<span className="mandatory">*</span></label>
+            <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone" required className={errors.phone ? "error" : ""} />
           </div>
           <div className="form-group">
-            <label>Password *</label>
-            <input name="password" value={form.password} onChange={handleChange} placeholder="Password" type="password" required/>
+            <label>Password<span className="mandatory">*</span></label>
+            <input name="password" value={form.password} onChange={handleChange} placeholder="Password" type="password" required className={errors.password ? "error" : ""} />
           </div>
           <div className="form-group">
-            <label>Confirm Password *</label>
-            <input name="confirmPassword" value={form.confirmPassword} onChange={handleChange} placeholder="Confirm Password" type="password" required/>
+            <label>Confirm Password<span className="mandatory">*</span></label>
+            <input name="confirmPassword" value={form.confirmPassword} onChange={handleChange} placeholder="Confirm Password" type="password" required className={errors.confirmPassword ? "error" : ""} />
           </div>
           
           {error && <div className="error">{error}</div>}

@@ -2,7 +2,6 @@
    SMART SUBMISSIONS — RECRUITER DASHBOARD (FINAL)
    ========================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
 
 .recruiter-dashboard-page {
   font-family: 'Poppins', sans-serif;
@@ -11,7 +10,7 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding: 60px 20px;
+  padding: 110px 20px 60px 20px; /* ✅ FIXED */
 }
 
 /* Main card container */

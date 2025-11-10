@@ -1,11 +1,6 @@
-// FILE: src/pages/Login.js (Complete, Corrected Code)
-
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom'; 
-// ✅ FIX: Use the AuthContext hook
 import { useAuth } from '../context/AuthContext'; 
-
-// ✅ FIX 1: Use the correct shared CSS file
 import '../styles/Login.css'; 
 
 const Login = () => {
@@ -13,21 +8,31 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({}); // ✅ For field validation
 
   const navigate = useNavigate();
-  // ✅ FIX: Get the login function from context
   const { login } = useAuth(); 
 
   const location = useLocation();
   const message = location.state?.message;
 
+  // ✅ Validation function
+  const validate = () => {
+    const newErrors = {};
+    if (!email) newErrors.email = "Email is required";
+    if (!password) newErrors.password = "Password is required";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    if (!validate()) return; // ✅ Run validation
+
     setLoading(true);
 
     try {
-      // ✅ FIX: Use the login function from context
       const result = await login(email, password); 
       
       if (result.success) {
@@ -44,14 +49,10 @@ const Login = () => {
   };
 
   return (
-    // ✅ FIX 2: Use the correct wrapper class from Login.css
     <div className="auth-page-container"> 
-      {/* ✅ FIX 3: Use the auth-card class for consistent styling */}
       <div className="auth-card"> 
-        {/* ✅ MODIFICATION: Title changed */}
         <h2>Candidate Login</h2>
 
-        {/* This displays the message from registration */}
         {message && (
           <div className="success">
             {message}
@@ -60,24 +61,32 @@ const Login = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">Email<span className="mandatory">*</span></label>
             <input
               type="email"
               id="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (errors.email) setErrors(p => ({...p, email: null}));
+              }}
               required
+              className={errors.email ? "error" : ""} // ✅ Apply error class
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">Password<span className="mandatory">*</span></label>
             <input
               type="password"
               id="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (errors.password) setErrors(p => ({...p, password: null}));
+              }}
               required
+              className={errors.password ? "error" : ""} // ✅ Apply error class
             />
           </div>
 
@@ -94,7 +103,6 @@ const Login = () => {
 
         <p>
           Don't have an account?{' '}
-          {/* ✅ FIX 4: Changed link from "/candidates" to "/register" */}
           <Link to="/register">Register here</Link>
         </p>
       </div>

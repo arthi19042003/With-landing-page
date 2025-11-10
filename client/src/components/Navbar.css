@@ -22,6 +22,7 @@
   font-weight: 700;
   color: #000;
   letter-spacing: -0.5px;
+  text-decoration: none; /* ✅ THIS IS THE FIX */
 }
 
 .navbar-menu {

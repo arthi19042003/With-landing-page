@@ -24,15 +24,15 @@ const ProfileItem = ({ item, onRemove, onUpdate, type }) => {
       <div className="profile-item-editor">
         {type === 'exp' && (
           <>
-            <input name="position" value={formData.position} onChange={handleChange} placeholder="Position" />
-            <input name="company" value={formData.company} onChange={handleChange} placeholder="Company" />
+            <input name="position" value={formData.position} onChange={handleChange} placeholder="Position *" />
+            <input name="company" value={formData.company} onChange={handleChange} placeholder="Company *" />
           </>
         )}
         {type === 'edu' && (
           <>
-            <input name="institution" value={formData.institution} onChange={handleChange} placeholder="Institution" />
-            <input name="degree" value={formData.degree} onChange={handleChange} placeholder="Degree" />
-            <input name="field" value={formData.field} onChange={handleChange} placeholder="Field of Study" />
+            <input name="institution" value={formData.institution} onChange={handleChange} placeholder="Institution *" />
+            <input name="degree" value={formData.degree} onChange={handleChange} placeholder="Degree *" />
+            <input name="field" value={formData.field} onChange={handleChange} placeholder="Field of Study *" />
           </>
         )}
         <input name="startDate" type="date" value={formData.startDate?.split('T')[0] || ''} onChange={handleChange} />
@@ -72,6 +72,9 @@ const Profile = () => {
   const { user, updateUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
+  
+  const [errors, setErrors] = useState({});
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -87,7 +90,6 @@ const Profile = () => {
   const [experience, setExperience] = useState([]);
   const [education, setEducation] = useState([]);
   
-  // States for new Exp/Edu forms
   const [newExp, setNewExp] = useState({ company: '', position: '', startDate: '', endDate: '', description: '', current: false });
   const [newEdu, setNewEdu] = useState({ institution: '', degree: '', field: '', startDate: '', endDate: '', current: false });
   const [showExpForm, setShowExpForm] = useState(false);
@@ -112,13 +114,16 @@ const Profile = () => {
   }, [user]);
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: null }));
+    }
   };
 
-  // --- Skills Handlers ---
   const handleAddSkill = () => {
     if (skillInput.trim() && !formData.skills.includes(skillInput.trim())) {
       setFormData({
@@ -136,14 +141,45 @@ const Profile = () => {
     });
   };
 
-  // --- Main Profile Save ---
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.firstName) newErrors.firstName = "First Name is required.";
+    if (!formData.lastName) newErrors.lastName = "Last Name is required.";
+    if (!formData.phone) newErrors.phone = "Phone is required.";
+    if (!formData.city) newErrors.city = "City is required.";
+    if (!formData.state) newErrors.state = "State is required.";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validateSubForm = (type, data) => {
+    const newErrors = {};
+    if (type === 'exp') {
+      if (!data.position) newErrors.newExp_position = "Position is required.";
+      if (!data.company) newErrors.newExp_company = "Company is required.";
+      if (!data.startDate) newErrors.newExp_startDate = "Start Date is required.";
+    }
+    if (type === 'edu') {
+      if (!data.institution) newErrors.newEdu_institution = "Institution is required.";
+      if (!data.degree) newErrors.newEdu_degree = "Degree is required.";
+      if (!data.field) newErrors.newEdu_field = "Field is required.";
+      if (!data.startDate) newErrors.newEdu_startDate = "Start Date is required.";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setMessage({ type: "", text: "" });
 
+    if (!validateForm()) {
+      setMessage({ type: "error", text: "Please fill all mandatory fields." });
+      return;
+    }
+
+    setLoading(true);
     try {
-      // Only send the main profile data, exp/edu are saved separately
       const response = await api.put("/profile", formData);
       updateUser(response.data.user);
       setMessage({ type: "success", text: "Profile updated successfully!" });
@@ -156,6 +192,7 @@ const Profile = () => {
 
   // --- Experience Handlers ---
   const handleAddExperience = async () => {
+    if (!validateSubForm('exp', newExp)) return;
     try {
       const res = await api.post('/profile/experience', newExp);
       setExperience(res.data.experience);
@@ -178,6 +215,7 @@ const Profile = () => {
 
   // --- Education Handlers ---
    const handleAddEducation = async () => {
+    if (!validateSubForm('edu', newEdu)) return;
     try {
       const res = await api.post('/profile/education', newEdu);
       setEducation(res.data.education);
@@ -203,11 +241,7 @@ const Profile = () => {
       <div className="profile-container">
         <h1 className="profile-heading">Edit Profile</h1>
 
-        {message.text && (
-          <div className={message.type === "success" ? "success" : "error"}>
-            {message.text}
-          </div>
-        )}
+        {/* --- ✅ MESSAGE MOVED FROM HERE --- */}
 
         {/* Personal Info Form */}
         <form onSubmit={handleSubmit}>
@@ -215,17 +249,17 @@ const Profile = () => {
             <h2>Personal Information</h2>
             <div className="form-row">
               <div className="form-group">
-                <label>First Name</label>
-                <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} />
+                <label>First Name<span className="mandatory">*</span></label>
+                <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} className={errors.firstName ? "error" : ""} />
               </div>
               <div className="form-group">
-                <label>Last Name</label>
-                <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} />
+                <label>Last Name<span className="mandatory">*</span></label>
+                <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} className={errors.lastName ? "error" : ""} />
               </div>
             </div>
             <div className="form-group">
-              <label>Phone</label>
-              <input type="tel" name="phone" value={formData.phone} onChange={handleChange} />
+              <label>Phone<span className="mandatory">*</span></label>
+              <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className={errors.phone ? "error" : ""} />
             </div>
             <div className="form-group">
               <label>Address</label>
@@ -233,12 +267,12 @@ const Profile = () => {
             </div>
             <div className="form-row">
               <div className="form-group">
-                <label>City</label>
-                <input type="text" name="city" value={formData.city} onChange={handleChange} />
+                <label>City<span className="mandatory">*</span></label>
+                <input type="text" name="city" value={formData.city} onChange={handleChange} className={errors.city ? "error" : ""} />
               </div>
               <div className="form-group">
-                <label>State</label>
-                <input type="text" name="state" value={formData.state} />
+                <label>State<span className="mandatory">*</span></label>
+                <input type="text" name="state" value={formData.state} onChange={handleChange} className={errors.state ? "error" : ""} />
               </div>
               <div className="form-group">
                 <label>Zip Code</label>
@@ -274,6 +308,13 @@ const Profile = () => {
             </div>
           </div>
 
+          {/* --- ✅ MESSAGE MOVED HERE --- */}
+          {message.text && (
+            <div className={`form-message ${message.type}`}>
+              {message.text}
+            </div>
+          )}
+
           <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? "Saving..." : "Save Personal Info"}
           </button>
@@ -289,14 +330,26 @@ const Profile = () => {
           </div>
           {showExpForm && (
             <div className="profile-item-editor">
-              <input name="position" value={newExp.position} onChange={(e) => setNewExp(p => ({ ...p, position: e.target.value }))} placeholder="Position" />
-              <input name="company" value={newExp.company} onChange={(e) => setNewExp(p => ({ ...p, company: e.target.value }))} placeholder="Company" />
-              <input name="startDate" type="date" value={newExp.startDate} onChange={(e) => setNewExp(p => ({ ...p, startDate: e.target.value }))} />
+              <input name="position" value={newExp.position} onChange={(e) => setNewExp(p => ({ ...p, position: e.target.value }))} placeholder="Position *" className={errors.newExp_position ? "error" : ""} />
+              {errors.newExp_position && <span className="error-text">{errors.newExp_position}</span>}
+              
+              <input name="company" value={newExp.company} onChange={(e) => setNewExp(p => ({ ...p, company: e.target.value }))} placeholder="Company *" className={errors.newExp_company ? "error" : ""} />
+              {errors.newExp_company && <span className="error-text">{errors.newExp_company}</span>}
+
+              <label>Start Date<span className="mandatory">*</span></label>
+              <input name="startDate" type="date" value={newExp.startDate} onChange={(e) => setNewExp(p => ({ ...p, startDate: e.target.value }))} className={errors.newExp_startDate ? "error" : ""} />
+              {errors.newExp_startDate && <span className="error-text">{errors.newExp_startDate}</span>}
+
               {!newExp.current && (
-                <input name="endDate" type="date" value={newExp.endDate} onChange={(e) => setNewExp(p => ({ ...p, endDate: e.target.value }))} />
+                <>
+                  <label>End Date</label>
+                  <input name="endDate" type="date" value={newExp.endDate} onChange={(e) => setNewExp(p => ({ ...p, endDate: e.target.value }))} />
+                </>
               )}
               <label><input name="current" type="checkbox" checked={newExp.current} onChange={(e) => setNewExp(p => ({ ...p, current: e.target.checked }))} /> Current</label>
+              
               <textarea name="description" value={newExp.description} onChange={(e) => setNewExp(p => ({ ...p, description: e.target.value }))} placeholder="Description" />
+              
               <button onClick={handleAddExperience} className="btn-save-item">Save</button>
             </div>
           )}
@@ -317,12 +370,24 @@ const Profile = () => {
           </div>
            {showEduForm && (
             <div className="profile-item-editor">
-              <input name="institution" value={newEdu.institution} onChange={(e) => setNewEdu(p => ({ ...p, institution: e.target.value }))} placeholder="Institution" />
-              <input name="degree" value={newEdu.degree} onChange={(e) => setNewEdu(p => ({ ...p, degree: e.target.value }))} placeholder="Degree" />
-              <input name="field" value={newEdu.field} onChange={(e) => setNewEdu(p => ({ ...p, field: e.target.value }))} placeholder="Field of Study" />
-              <input name="startDate" type="date" value={newEdu.startDate} onChange={(e) => setNewEdu(p => ({ ...p, startDate: e.target.value }))} />
+              <input name="institution" value={newEdu.institution} onChange={(e) => setNewEdu(p => ({ ...p, institution: e.target.value }))} placeholder="Institution *" className={errors.newEdu_institution ? "error" : ""} />
+              {errors.newEdu_institution && <span className="error-text">{errors.newEdu_institution}</span>}
+
+              <input name="degree" value={newEdu.degree} onChange={(e) => setNewEdu(p => ({ ...p, degree: e.target.value }))} placeholder="Degree *" className={errors.newEdu_degree ? "error" : ""} />
+              {errors.newEdu_degree && <span className="error-text">{errors.newEdu_degree}</span>}
+
+              <input name="field" value={newEdu.field} onChange={(e) => setNewEdu(p => ({ ...p, field: e.target.value }))} placeholder="Field of Study *" className={errors.newEdu_field ? "error" : ""} />
+              {errors.newEdu_field && <span className="error-text">{errors.newEdu_field}</span>}
+
+              <label>Start Date<span className="mandatory">*</span></label>
+              <input name="startDate" type="date" value={newEdu.startDate} onChange={(e) => setNewEdu(p => ({ ...p, startDate: e.target.value }))} className={errors.newEdu_startDate ? "error" : ""} />
+              {errors.newEdu_startDate && <span className="error-text">{errors.newEdu_startDate}</span>}
+
               {!newEdu.current && (
-                <input name="endDate" type="date" value={newEdu.endDate} onChange={(e) => setNewEdu(p => ({ ...p, endDate: e.target.value }))} />
+                <>
+                  <label>End Date</label>
+                  <input name="endDate" type="date" value={newEdu.endDate} onChange={(e) => setNewEdu(p => ({ ...p, endDate: e.target.value }))} />
+                </>
               )}
               <label><input name="current" type="checkbox" checked={newEdu.current} onChange={(e) => setNewEdu(p => ({ ...p, current: e.target.checked }))} /> Current</label>
               <button onClick={handleAddEducation} className="btn-save-item">Save</button>

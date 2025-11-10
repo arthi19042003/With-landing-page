@@ -46,6 +46,8 @@ const RecruiterProfile = () => {
       const updated = prev.majorskillsarea.includes(value)
         ? prev.majorskillsarea.filter((skill) => skill !== value)
         : [...prev.majorskillsarea, value];
+      // Also clear the error if it exists
+      if (errors.majorskillsarea) setErrors((prevErrors) => ({ ...prevErrors, majorskillsarea: "" }));
       return { ...prev, majorskillsarea: updated };
     });
   };
@@ -54,6 +56,8 @@ const RecruiterProfile = () => {
     const updated = [...data.ratecards];
     updated[index][field] = value;
     setData((prev) => ({ ...prev, ratecards: updated }));
+    // Clear error for this specific ratecard index
+    if (errors[`ratecard_${index}`]) setErrors((prevErrors) => ({ ...prevErrors, [`ratecard_${index}`]: "" }));
   };
 
   const addRatecard = () => {
@@ -140,7 +144,7 @@ const RecruiterProfile = () => {
         <form onSubmit={handleSubmit} className="recruiter-profile-form">
           {/* Address */}
           <div className="form-group">
-            <label htmlFor="address">Address*</label>
+            <label htmlFor="address">Address<span className="mandatory">*</span></label>
             <input
               type="text"
               id="address"
@@ -148,14 +152,15 @@ const RecruiterProfile = () => {
               value={data.address}
               onChange={handleChange}
               placeholder="123, Business St, Suite 100"
+              className={errors.address ? "error" : ""}
             />
             {errors.address && <span className="error-text">{errors.address}</span>}
           </div>
 
           {/* Major Skills Area */}
           <div className="form-group">
-            <label>Major Skills Area*</label>
-            <div className="skills-grid">
+            <label>Major Skills Area<span className="mandatory">*</span></label>
+            <div className={`skills-grid ${errors.majorskillsarea ? "error" : ""}`}>
               {["Development", "Testing", "Operations", "Business Analyst"].map((skill) => {
                 const isChecked = data.majorskillsarea.includes(skill);
                 return (
@@ -187,7 +192,8 @@ const RecruiterProfile = () => {
             { id: "numberofemployees", label: "Number of Employees*", placeholder: "e.g., 250" },
           ].map((field) => (
             <div className="form-group" key={field.id}>
-              <label htmlFor={field.id}>{field.label}</label>
+              {/* --- MODIFIED --- */}
+              <label htmlFor={field.id}>{field.label.replace('*', '')}<span className="mandatory">*</span></label>
               <input
                 type="text"
                 id={field.id}
@@ -195,20 +201,36 @@ const RecruiterProfile = () => {
                 value={data[field.id]}
                 onChange={handleChange}
                 placeholder={field.placeholder}
+                className={errors[field.id] ? "error" : ""}
               />
               {errors[field.id] && <span className="error-text">{errors[field.id]}</span>}
             </div>
           ))}
+          
+          {/* DUNS Number (Not Required) */}
+           <div className="form-group">
+              <label htmlFor="dunsnumber">DUNS Number</label>
+              <input
+                type="text"
+                id="dunsnumber"
+                name="dunsnumber"
+                value={data.dunsnumber}
+                onChange={handleChange}
+                placeholder="Enter DUNS Number"
+              />
+            </div>
+
 
           {/* Ratecards Section */}
           <div className="form-group">
-            <label>Ratecards with Skills*</label>
+            <label>Ratecards with Skills<span className="mandatory">*</span></label>
             {data.ratecards.map((ratecard, index) => (
               <div className="ratecard-entry" key={index}>
                 <div className="ratecard-row">
                   <select
                     value={ratecard.role}
                     onChange={(e) => handleRatecardChange(index, "role", e.target.value)}
+                    className={errors[`ratecard_${index}`] ? "error" : ""}
                   >
                     <option value="">Select Role</option>
                     {roleOptions.map((role) => (
@@ -217,12 +239,19 @@ const RecruiterProfile = () => {
                       </option>
                     ))}
                   </select>
-                  <input
-                    type="number"
-                    placeholder="LPA"
-                    value={ratecard.lpa}
-                    onChange={(e) => handleRatecardChange(index, "lpa", e.target.value)}
-                  />
+                  
+                  <div className="input-with-unit">
+                    <span className="unit-symbol-start">₹</span>
+                    <input
+                      type="number"
+                      placeholder="LPA"
+                      value={ratecard.lpa}
+                      onChange={(e) => handleRatecardChange(index, "lpa", e.target.value)}
+                      className={`input-lpa ${errors[`ratecard_${index}`] ? "error" : ""}`}
+                    />
+                    <span className="unit-symbol-end">LPA</span>
+                  </div>
+
                   {data.ratecards.length > 1 && (
                     <button
                       type="button"
@@ -233,6 +262,7 @@ const RecruiterProfile = () => {
                     </button>
                   )}
                 </div>
+                {errors[`ratecard_${index}`] && <span className="error-text ratecard-error">{errors[`ratecard_${index}`]}</span>}
               </div>
             ))}
             <button

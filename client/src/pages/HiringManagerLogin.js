@@ -1,9 +1,7 @@
-// client/src/pages/HiringManagerLogin.js
 import React, { useState } from "react";
-import axios from "axios";
-// ✅ FIX: Import useLocation
 import { useNavigate, Link, useLocation } from "react-router-dom"; 
 import { useAuth } from "../context/AuthContext";
+import api from "../api/axios"; // ✅ Use api instance
 import "../styles/Login.css"; 
 
 export default function HiringManagerLogin() {
@@ -11,19 +9,31 @@ export default function HiringManagerLogin() {
   const [password, setPassword] = useState("");
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({}); // ✅ For field validation
+  
   const navigate = useNavigate();
   const { setUser } = useAuth();
 
-  // ✅ FIX: Get location and message from state
   const location = useLocation();
   const message = location.state?.message;
+
+  // ✅ Validation function
+  const validate = () => {
+    const newErrors = {};
+    if (!email) newErrors.email = "Email is required";
+    if (!password) newErrors.password = "Password is required";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErr("");
+    if (!validate()) return; // ✅ Run validation
+    
     setLoading(true);
     try {
-      const res = await axios.post("/api/auth/login", { 
+      const res = await api.post("/auth/login", { // ✅ Use api instance
         email, 
         password, 
         role: "hiringManager" 
@@ -46,21 +56,39 @@ export default function HiringManagerLogin() {
       <div className="auth-card"> 
         <h2>Hiring Manager Login</h2>
         
-        {/* ✅ FIX: Display success message if it exists */}
         {message && (
-          <div className="success">
+          <div className="success" style={{ textAlign: 'center', marginBottom: '15px' }}>
             {message}
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Email</label>
-            <input value={email} onChange={(e)=>setEmail(e.target.value)} placeholder="Email" required />
+            <label>Email<span className="mandatory">*</span></label>
+            <input 
+              value={email} 
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (errors.email) setErrors(p => ({...p, email: null}));
+              }} 
+              placeholder="Email" 
+              required 
+              className={errors.email ? "error" : ""} // ✅ Apply error class
+            />
           </div>
           <div className="form-group">
-            <label>Password</label>
-            <input value={password} onChange={(e)=>setPassword(e.target.value)} placeholder="Password" type="password" required />
+            <label>Password<span className="mandatory">*</span></label>
+            <input 
+              value={password} 
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (errors.password) setErrors(p => ({...p, password: null}));
+              }} 
+              placeholder="Password" 
+              type="password" 
+              required 
+              className={errors.password ? "error" : ""} // ✅ Apply error class
+            />
           </div>
           
           {err && <div className="error">{err}</div>}

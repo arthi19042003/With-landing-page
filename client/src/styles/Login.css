@@ -10,10 +10,6 @@
   box-sizing: border-box; /* ✅ ADDED: Ensures padding is included in height */
 }
 
-/* ❌ REMOVED .login-page-bg (which had login-bg.png) */
-/* ❌ REMOVED .register-page-bg (which had register-bg.jpg) */
-
-
 /* ✅ Card Box (Preserved your style) */
 .auth-card {
   width: 520px; /* ⬅️ Bigger card */
@@ -45,6 +41,12 @@ label {
   margin-bottom: 8px;
 }
 
+.mandatory {
+  color: #dc2626; /* Red color */
+  font-weight: 700;
+  margin-left: 4px;
+}
+
 input {
   padding: 14px;
   border: 1px solid #d3d3d3;
@@ -58,6 +60,19 @@ input:focus {
   box-shadow: 0 0 6px rgba(138, 79, 242, 0.4);
   outline: none;
 }
+
+/* --- ✅ NEW: ERROR STYLES FOR INPUTS --- */
+input.error {
+  border-color: #dc2626 !important; /* Red border */
+  background-color: #fee2e2 !important; /* Light red background */
+}
+
+input.error:focus {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 6px rgba(220, 38, 38, 0.3) !important;
+}
+/* --- END NEW STYLES --- */
+
 
 /* ✅ Button (Preserved your style) */
 button {

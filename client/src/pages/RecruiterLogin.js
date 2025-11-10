@@ -1,37 +1,48 @@
-// client/src/pages/RecruiterLogin.js
 import React, { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import api from "../api/axios"; // Use the axios instance
-import "../styles/Login.css"; // Use the shared login styles
+import api from "../api/axios"; 
+import "../styles/Login.css"; 
 
 export default function RecruiterLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({}); // ✅ For field validation
+  
   const navigate = useNavigate();
-  const { setUser } = useAuth(); // Get setUser to update context manually
+  const { setUser } = useAuth(); 
 
   const location = useLocation();
   const message = location.state?.message;
 
+  // ✅ Validation function
+  const validate = () => {
+    const newErrors = {};
+    if (!email) newErrors.email = "Email is required";
+    if (!password) newErrors.password = "Password is required";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+    if (!validate()) return; // ✅ Run validation
+    
     setLoading(true);
     try {
-      // Use the general /api/auth/login route, specifying the role
       const res = await api.post("/auth/login", {
         email,
         password,
-        role: "recruiter", // Specify the role
+        role: "recruiter", 
       });
 
       if (res.data.token) {
         localStorage.setItem("token", res.data.token);
         setUser(res.data.user);
-        navigate("/dashboard"); // Redirect to the main dashboard
+        navigate("/dashboard"); 
       }
     } catch (err) {
       setError(err.response?.data?.message || "Login failed. Check credentials.");
@@ -46,7 +57,6 @@ export default function RecruiterLogin() {
       <div className="auth-card">
         <h2>Recruiter Login</h2>
 
-        {/* Display success message from registration */}
         {message && (
           <div className="success" style={{ textAlign: 'center', marginBottom: '15px' }}>
             {message}
@@ -55,23 +65,31 @@ export default function RecruiterLogin() {
 
         <form onSubmit={handleLogin}>
           <div className="form-group">
-            <label>Email</label>
+            <label>Email<span className="mandatory">*</span></label>
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (errors.email) setErrors(p => ({...p, email: null}));
+              }}
               placeholder="Email"
               required
+              className={errors.email ? "error" : ""} // ✅ Apply error class
             />
           </div>
           <div className="form-group">
-            <label>Password</label>
+            <label>Password<span className="mandatory">*</span></label>
             <input
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (errors.password) setErrors(p => ({...p, password: null}));
+              }}
               placeholder="Password"
               required
+              className={errors.password ? "error" : ""} // ✅ Apply error class
             />
           </div>
 

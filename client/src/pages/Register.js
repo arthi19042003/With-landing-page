@@ -1,8 +1,7 @@
-// client/src/pages/Register.js
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import "../styles/Login.css"; // Reuse login styles
+import "../styles/Login.css"; 
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -17,28 +16,46 @@ const Register = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({}); // ✅ For field validation
   
-  // ✅ MODIFICATION: Get both register and logout from useAuth
   const { register, logout } = useAuth(); 
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    if (errors[name]) setErrors(p => ({ ...p, [name]: null }));
+  };
+
+  // ✅ Validation function
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.firstName) newErrors.firstName = "First Name is required";
+    if (!formData.lastName) newErrors.lastName = "Last Name is required";
+    if (!formData.email) newErrors.email = "Email is required";
+    if (!formData.phone) newErrors.phone = "Phone is required";
+    if (!formData.city) newErrors.city = "City is required";
+    if (!formData.state) newErrors.state = "State is required";
+    if (!formData.password) newErrors.password = "Password is required";
+    if (!formData.confirmPassword) newErrors.confirmPassword = "Confirm Password is required";
+    
+    if (formData.password && formData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+    if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
-    if (formData.password !== formData.confirmPassword)
-      return setError("Passwords do not match");
-
-    if (formData.password.length < 6)
-      return setError("Password must be at least 6 characters");
+    if (!validate()) return; // ✅ Run validation
 
     setLoading(true);
     
-    // Pass all candidate data to the register function
     const result = await register({
       firstName: formData.firstName,
       lastName: formData.lastName,
@@ -47,14 +64,13 @@ const Register = () => {
       city: formData.city,
       state: formData.state,
       password: formData.password,
-      role: 'candidate' // Explicitly set role
+      role: 'candidate'
     });
     
     setLoading(false);
 
-    // ✅ MODIFICATION: Change navigation on success
     if (result.success) {
-      logout(); // Log out to clear the session token
+      logout(); 
       navigate('/login', { 
         state: { message: 'Registration successful! Please log in.' } 
       });
@@ -72,45 +88,44 @@ const Register = () => {
           
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
             <div className="form-group">
-              <label>First Name</label>
-              <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} required />
+              <label>First Name<span className="mandatory">*</span></label>
+              <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} required className={errors.firstName ? "error" : ""} />
             </div>
             <div className="form-group">
-              <label>Last Name</label>
-              <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} required />
+              <label>Last Name<span className="mandatory">*</span></label>
+              <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} required className={errors.lastName ? "error" : ""} />
             </div>
           </div>
           
           <div className="form-group">
-            <label>Email</label>
-            <input type="email" name="email" value={formData.email} onChange={handleChange} required />
+            <label>Email<span className="mandatory">*</span></label>
+            <input type="email" name="email" value={formData.email} onChange={handleChange} required className={errors.email ? "error" : ""} />
           </div>
           
           <div className="form-group">
-            <label>Phone</label>
-            <input type="tel" name="phone" value={formData.phone} onChange={handleChange} />
+            <label>Phone<span className="mandatory">*</span></label>
+            <input type="tel" name="phone" value={formData.phone} onChange={handleChange} required className={errors.phone ? "error" : ""} />
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
             <div className="form-group">
-              <label>City</label>
-              <input type="text" name="city" value={formData.city} onChange={handleChange} />
+              <label>City<span className="mandatory">*</span></label>
+              <input type="text" name="city" value={formData.city} onChange={handleChange} required className={errors.city ? "error" : ""} />
             </div>
             <div className="form-group">
-              <label>State</label>
-              {/* ✅ FIX: Added value and onChange to this input */}
-              <input type="text" name="state" value={formData.state} onChange={handleChange} />
+              <label>State<span className="mandatory">*</span></label>
+              <input type="text" name="state" value={formData.state} onChange={handleChange} required className={errors.state ? "error" : ""} />
             </div>
           </div>
 
           <div className="form-group">
-            <label>Password</label>
-            <input type="password" name="password" value={formData.password} onChange={handleChange} required />
+            <label>Password<span className="mandatory">*</span></label>
+            <input type="password" name="password" value={formData.password} onChange={handleChange} required className={errors.password ? "error" : ""} />
           </div>
 
           <div className="form-group">
-            <label>Confirm Password</label>
-            <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required />
+            <label>Confirm Password<span className="mandatory">*</span></label>
+            <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required className={errors.confirmPassword ? "error" : ""} />
           </div>
 
           {error && <div className="error">{error}</div>}

@@ -1,8 +1,7 @@
-// client/src/pages/RecruiterRegister.js
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import "../styles/Login.css"; // We can reuse the same login styles
+import "../styles/Login.css"; 
 
 const RecruiterRegister = () => {
   const [formData, setFormData] = useState({
@@ -18,32 +17,43 @@ const RecruiterRegister = () => {
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({}); // ✅ For field validation
   
-  // ✅ FIX 1: Import logout from useAuth
   const { register, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    if (error) setError('');
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    if (errors[name]) setErrors(p => ({ ...p, [name]: null }));
+  };
+
+  // ✅ Validation function
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.accessCode) newErrors.accessCode = "Access Code is required";
+    if (!formData.agencyName) newErrors.agencyName = "Agency Name is required";
+    if (!formData.firstName) newErrors.firstName = "First Name is required";
+    if (!formData.lastName) newErrors.lastName = "Last Name is required";
+    if (!formData.email) newErrors.email = "Email is required";
+    if (!formData.phone) newErrors.phone = "Phone is required";
+    if (!formData.password) newErrors.password = "Password is required";
+    if (!formData.confirmPassword) newErrors.confirmPassword = "Confirm Password is required";
+    
+    if (formData.password && formData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+    if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-    
-    // Note: You should ideally validate the accessCode on the backend
-    // but leaving your existing client-side checks as-is.
-    
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return;
-    }
+    if (!validate()) return; // ✅ Run validation
 
     setLoading(true);
 
@@ -54,18 +64,16 @@ const RecruiterRegister = () => {
       email: formData.email,
       phone: formData.phone,
       password: formData.password,
-      role: "recruiter", // Set the role
-      accessCode: formData.accessCode // Pass access code
+      role: "recruiter", 
+      accessCode: formData.accessCode 
     };
 
-    const result = await register(recruiterData); // Register function will still log in
+    const result = await register(recruiterData);
     setLoading(false);
 
     if (result.success) {
-      // ✅ FIX 2: Log the user out immediately after registration
       logout();
       
-      // ✅ FIX 3: Navigate to the new recruiter login page with a success message
       navigate('/login/recruiter', { 
         state: { message: 'Registration successful! Please log in.' } 
       });
@@ -81,43 +89,43 @@ const RecruiterRegister = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Access Code *</label>
-            <input type="text" name="accessCode" value={formData.accessCode} onChange={handleChange} required />
+            <label>Access Code<span className="mandatory">*</span></label>
+            <input type="text" name="accessCode" value={formData.accessCode} onChange={handleChange} required className={errors.accessCode ? "error" : ""} />
           </div>
           <div className="form-group">
-            <label>Agency Name *</label>
-            <input type="text" name="agencyName" value={formData.agencyName} onChange={handleChange} required />
+            <label>Agency Name<span className="mandatory">*</span></label>
+            <input type="text" name="agencyName" value={formData.agencyName} onChange={handleChange} required className={errors.agencyName ? "error" : ""} />
           </div>
           
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
             <div className="form-group">
-              <label>First Name *</label>
-              <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} required />
+              <label>First Name<span className="mandatory">*</span></label>
+              <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} required className={errors.firstName ? "error" : ""} />
             </div>
             <div className="form-group">
-              <label>Last Name *</label>
-              <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} required />
+              <label>Last Name<span className="mandatory">*</span></label>
+              <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} required className={errors.lastName ? "error" : ""} />
             </div>
           </div>
 
           <div className="form-group">
-            <label>Company Email *</label>
-            <input type="email" name="email" value={formData.email} onChange={handleChange} required />
+            <label>Company Email<span className="mandatory">*</span></label>
+            <input type="email" name="email" value={formData.email} onChange={handleChange} required className={errors.email ? "error" : ""} />
           </div>
 
           <div className="form-group">
-            <label>Phone *</label>
-            <input type="tel" name="phone" value={formData.phone} onChange={handleChange} required />
+            <label>Phone<span className="mandatory">*</span></label>
+            <input type="tel" name="phone" value={formData.phone} onChange={handleChange} required className={errors.phone ? "error" : ""} />
           </div>
 
           <div className="form-group">
-            <label>Password *</label>
-            <input type="password" name="password" value={formData.password} onChange={handleChange} required />
+            <label>Password<span className="mandatory">*</span></label>
+            <input type="password" name="password" value={formData.password} onChange={handleChange} required className={errors.password ? "error" : ""} />
           </div>
 
           <div className="form-group">
-            <label>Confirm Password *</label>
-            <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required />
+            <label>Confirm Password<span className="mandatory">*</span></label>
+            <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required className={errors.confirmPassword ? "error" : ""} />
           </div>
 
           {error && <p className="error">{error}</p>}
@@ -128,7 +136,6 @@ const RecruiterRegister = () => {
         </form>
 
         <p>
-          {/* ✅ FIX 4: Update link to point to the new login page */}
           Already registered? <Link to="/login/recruiter">Login here</Link>
         </p>
       </div>

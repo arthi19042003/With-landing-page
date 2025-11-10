@@ -10,7 +10,7 @@
   align-items: flex-start;
   background-color: #f9fafc;
   min-height: 100vh;
-  padding: 60px 20px;
+  padding: 110px 20px 60px 20px; /* ✅ FIXED */
   font-family: "Inter", sans-serif;
 }
 
