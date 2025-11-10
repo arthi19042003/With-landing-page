@@ -1,3 +1,4 @@
+// [File: arthi19042003/with-landing-page/With-landing-page-0f24402f43f461a8bca04af752e98da1034a70d5/server/routes/submissions.js]
 const express = require("express");
 const router = express.Router();
 const protect = require("../middleware/auth"); // ✅ FIX: Corrected import
@@ -9,9 +10,11 @@ const Submission = require("../models/Submission");
 // ====================================================
 router.get("/", protect, async (req, res) => {
   try {
-    const submissions = await Submission.find()
-      .populate("candidate", "name email")
-      .populate("position", "title")
+    // ✅ FIX 1: Filter submissions by the logged-in user (recruiter)
+    const submissions = await Submission.find({ submittedBy: req.user._id })
+      // ✅ FIX 2: Populate the full candidate object
+      .populate("candidate") 
+      .populate("position", "title department") // Populate position info
       .populate("submittedBy", "name email role")
       .sort({ createdAt: -1 }); // ✅ correct field for sorting
 
@@ -44,8 +47,8 @@ router.post("/", protect, async (req, res) => {
     await submission.save();
 
     const populatedSubmission = await Submission.findById(submission._id)
-      .populate("candidate", "name email")
-      .populate("position", "title")
+      .populate("candidate") // ✅ FIX: Populate full candidate
+      .populate("position", "title department") // ✅ FIX: Populate position
       .populate("submittedBy", "name email role");
 
     res.status(201).json(populatedSubmission);
@@ -81,8 +84,8 @@ router.put("/:id", protect, async (req, res) => {
     const updatedSubmission = await submission.save();
 
     const populatedSubmission = await Submission.findById(updatedSubmission._id)
-      .populate("candidate", "name email")
-      .populate("position", "title")
+      .populate("candidate") // ✅ FIX: Populate full candidate
+      .populate("position", "title department") // ✅ FIX: Populate position
       .populate("submittedBy", "name email role");
 
     res.json(populatedSubmission);

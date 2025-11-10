@@ -1,3 +1,4 @@
+// [File: arthi19042003/with-landing-page/With-landing-page-0f24402f43f461a8bca04af752e98da1034a70d5/client/src/context/AuthContext.js]
 // client/src/context/AuthContext.js
 import React, { createContext, useContext, useState, useEffect } from "react";
 import api from "../api/axios"; // Using the configured axios instance
@@ -101,14 +102,48 @@ export const AuthProvider = ({ children }) => {
      setUser(prevUser => ({...prevUser, ...newUserData}));
   }
 
+  // ✅ NEW: Function to update the profile (used by RecruiterProfile/RecruiterProfileEdit)
+  const recruiterProfile = async (profileData) => {
+    try {
+      // Use the general /api/profile route to update
+      const res = await api.put("/profile", profileData); 
+      if (res.data && res.data.success && res.data.user) {
+        setUser(res.data.user); // Update the user in context
+        return { success: true, user: res.data.user };
+      }
+      return { success: false, error: "Invalid response from server" };
+    } catch (err) {
+      return { success: false, error: err.response?.data?.message || "Profile update failed" };
+    }
+  };
+
+  // ✅ NEW: Function to get the profile (used by RecruiterProfileEdit/RecruiterProfileView)
+  const getRecruiterProfile = async () => {
+     try {
+      // Use the general /api/profile route to fetch
+      const res = await api.get("/profile"); 
+      if (res.data && res.data.user) {
+        setUser(res.data.user);
+        // The components expect { success: true, recruiter: ... }
+        return { success: true, recruiter: res.data.user };
+      }
+      return { success: false, error: "Profile not found" };
+    } catch (err) {
+       return { success: false, error: err.response?.data?.message || "Failed to fetch profile" };
+    }
+  };
+
   const value = {
     user,
+    recruiter: user, // ✅ ADDED: Alias user as recruiter for components that use this
     setUser: manuallySetUser,
     updateUser,
     loading,
     login,
     register,
     logout,
+    recruiterProfile, // ✅ ADDED: The missing function from the error
+    getRecruiterProfile, // ✅ ADDED: The other missing function
   };
 
   return (

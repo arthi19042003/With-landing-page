@@ -1,3 +1,4 @@
+// [File: arthi19042003/with-landing-page/With-landing-page-0f24402f43f461a8bca04af752e98da1034a70d5/server/routes/recruiter.js]
 // server/routes/recruiter.js
 const express = require("express");
 const router = express.Router();
@@ -45,6 +46,9 @@ router.post("/submit", auth, resumeUpload.single('resume'), async (req, res) => 
       linkedinProfile,
       positionId, 
       hiringManagerId,
+      // ✅ FIX 1: Get company and hiringManager from req.body
+      company,
+      hiringManager,
     } = req.body;
 
     if (!email || !positionId || !firstName || !hiringManagerId) {
@@ -74,6 +78,9 @@ router.post("/submit", auth, resumeUpload.single('resume'), async (req, res) => 
         submittedByRecruiter: req.userId,
         resumePath: req.file.path, // ✅ NEW
         resumeOriginalName: req.file.originalname, // ✅ NEW
+        // ✅ FIX 2: Add the new fields
+        company: company,
+        hiringManager: hiringManager,
       });
     } else {
       // If candidate exists, update their info
@@ -91,6 +98,9 @@ router.post("/submit", auth, resumeUpload.single('resume'), async (req, res) => 
         submittedByRecruiter: req.userId,
         resumePath: req.file.path, // ✅ NEW
         resumeOriginalName: req.file.originalname, // ✅ NEW
+        // ✅ FIX 3: Add the new fields
+        company: company,
+        hiringManager: hiringManager,
       });
     }
     await candidate.save();

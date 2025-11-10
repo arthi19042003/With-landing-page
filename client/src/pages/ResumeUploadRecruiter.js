@@ -1,97 +1,95 @@
-import React, { useState } from "react";
+// [File: arthi19042003/with-landing-page/With-landing-page-0f24402f43f461a8bca04af752e98da1034a70d5/client/src/pages/ResumeUploadRecruiter.js]
+import React, { useState, useEffect } from "react";
 import "./ResumeUploadRecruiter.css";
-import api from "../config";
+// ✅ FIX 1: Correct the api import
+import api from "../api/axios";
+import { useNavigate } from 'react-router-dom';
 
 const ResumeUploadRecruiter = () => {
-  const formFields = {
-    candidateName: { label: "Candidate Name*", type: "text", placeholder: "Enter candidate name" },
-    email: { label: "Email*", type: "email", placeholder: "Enter candidate email" },
-    phone: { label: "Phone*", type: "tel", placeholder: "Enter phone number" },
-    skypeId: { label: "Skype ID (Optional)", type: "text", placeholder: "Enter Skype ID" },
-    rate: { label: "Desired Rate ($/hr)*", type: "number", placeholder: "Enter rate in $/hr" },
-    location: { label: "Location (City, State)*", type: "text", placeholder: "Enter location" },
-    availability: { label: "Availability (e.g., Immediate)*", type: "text", placeholder: "Enter availability" },
-    github: { label: "GitHub URL (Optional)", type: "url", placeholder: "Enter GitHub profile URL" },
-    linkedin: { label: "LinkedIn URL (Optional)", type: "url", placeholder: "Enter LinkedIn profile URL" },
-    hiringManager: { label: "Hiring Manager*", type: "text", placeholder: "Enter hiring manager name" },
-    company: { label: "Company Name*", type: "text", placeholder: "Enter company name" },
-  };
+  // ✅ FIX 2: Updated form state to match the backend model
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    rate: "",
+    currentLocation: "",
+    availability: "",
+    skypeId: "",
+    githubProfile: "",
+    linkedinProfile: "",
+    positionId: "",
+    hiringManagerId: "",
+    // Note: The 'company' and 'hiringManager' text fields are saved on the candidate
+    // but the ID fields are used for submission. We'll keep them.
+    company: "",
+    hiringManager: "",
+  });
 
-  const requiredFields = [
-    "candidateName",
-    "email",
-    "phone",
-    "rate",
-    "location",
-    "availability",
-    "hiringManager",
-    "company",
-  ];
+  // ✅ NEW: State for dropdowns
+  const [positions, setPositions] = useState([]);
+  const [managers, setManagers] = useState([]);
 
-  const initialForm = Object.keys(formFields).reduce((acc, key) => {
-    acc[key] = "";
-    return acc;
-  }, {});
-
-  const [form, setForm] = useState(initialForm);
   const [file, setFile] = useState(null);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const navigate = useNavigate();
 
-  // --- Validation ---
-  const validateField = (name, value) => {
-    let error = "";
-    const trimmedValue = value.trim();
-
-    if (requiredFields.includes(name) && !trimmedValue)
-      error = "This field is required";
-
-    if (trimmedValue) {
-      switch (name) {
-        case "email":
-          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedValue))
-            error = "Enter a valid email";
-          break;
-        case "phone":
-          if (!/^\+\d+(?:\s?\d+)*$/.test(trimmedValue))
-            error =
-              "Phone number must start with +, followed by country code and digits (spaces allowed)";
-          break;
-
-        case "rate":
-          if (!/^[0-9]{1,5}$/.test(trimmedValue))
-            error = "Enter a valid rate (up to 5 digits)";
-          break;
-        default:
-          break;
+  // ✅ NEW: Fetch data for dropdowns
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [posRes, mgrRes] = await Promise.all([
+          api.get('/positions'),
+          api.get('/recruiter/managers')
+        ]);
+        setPositions(posRes.data || []);
+        // Filter for only HMs in this dropdown
+        setManagers(mgrRes.data.filter(u => u.role === 'hiringManager') || []);
+      } catch (error) {
+        setMessage({ type: 'error', text: 'Could not load positions or managers.' });
       }
-    }
-
-    return error;
-  };
+    };
+    fetchData();
+  }, []);
 
   // --- Handle input changes ---
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
-    setErrors({ ...errors, [name]: validateField(name, value) });
+    setForm((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
+  };
+
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+    if (errors.file) setErrors((prev) => ({ ...prev, file: "" }));
+  };
+  
+  // --- Validation ---
+  const validateForm = () => {
+    const newErrors = {};
+    if (!form.firstName) newErrors.firstName = "First name is required";
+    if (!form.lastName) newErrors.lastName = "Last name is required";
+    if (!form.email) newErrors.email = "Email is required";
+    if (!form.phone) newErrors.phone = "Phone is required";
+    if (!form.rate) newErrors.rate = "Rate is required";
+    if (!form.currentLocation) newErrors.currentLocation = "Location is required";
+    if (!form.availability) newErrors.availability = "Availability is required";
+    if (!form.positionId) newErrors.positionId = "Please select a position";
+    if (!form.hiringManagerId) newErrors.hiringManagerId = "Please select a manager";
+    if (!file) newErrors.file = "Please upload a resume file";
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   // --- Handle submit ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
-    const newErrors = {};
 
-    Object.entries(form).forEach(([key, val]) => {
-      const err = validateField(key, val);
-      if (err) newErrors[key] = err;
-    });
-    if (!file) newErrors.file = "Please upload a resume file";
-    setErrors(newErrors);
-
-    if (Object.keys(newErrors).length > 0) {
+    if (!validateForm()) {
       setMessage("❌ Please fix the errors before submitting.");
       return;
     }
@@ -99,16 +97,25 @@ const ResumeUploadRecruiter = () => {
     setLoading(true);
     try {
       const fd = new FormData();
+      // Append all form data
       Object.entries(form).forEach(([k, v]) => fd.append(k, v));
       fd.append("resume", file);
 
-      await api.post("/resume/upload", fd, {
+      // ✅ FIX 3: Post to the correct recruiter submission route
+      await api.post("/recruiter/submit", fd, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
       setMessage("✅ Resume submitted successfully!");
-      setForm(initialForm);
+      setForm(form); // Clear the form
       setFile(null);
+      // Clear file input
+      document.getElementById("resume").value = null;
+      
+      setTimeout(() => {
+        navigate('/recruiter/submission-status'); // Go to status page
+      }, 1500);
+
     } catch (err) {
       setMessage(err.response?.data?.message || "❌ Error submitting resume");
     } finally {
@@ -122,45 +129,118 @@ const ResumeUploadRecruiter = () => {
         <h2 className="resume-upload-title">Submit Candidate Resume</h2>
 
         <form onSubmit={handleSubmit} className="resume-upload-form" noValidate>
-          {Object.entries(formFields).map(([key, field]) => (
-            <div className="form-group" key={key}>
-              <label htmlFor={key}>{field.label}</label>
-              <input
-                id={key}
-                type={field.type}
-                name={key}
-                placeholder={field.placeholder}
-                value={form[key]}
-                onChange={handleChange}
-                className={errors[key] ? "error" : ""}
-              />
-              {errors[key] && (
-                <span className="error-text">{errors[key]}</span>
-              )}
-            </div>
-          ))}
+          {/* ✅ FIX 4: Updated form fields to match backend */}
+          <div className="form-group">
+            <label htmlFor="firstName">First Name*</label>
+            <input id="firstName" type="text" name="firstName" placeholder="Enter candidate's first name" value={form.firstName} onChange={handleChange} className={errors.firstName ? "error" : ""} />
+            {errors.firstName && <span className="error-text">{errors.firstName}</span>}
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="lastName">Last Name*</label>
+            <input id="lastName" type="text" name="lastName" placeholder="Enter candidate's last name" value={form.lastName} onChange={handleChange} className={errors.lastName ? "error" : ""} />
+            {errors.lastName && <span className="error-text">{errors.lastName}</span>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="email">Email*</label>
+            <input id="email" type="email" name="email" placeholder="Enter candidate email" value={form.email} onChange={handleChange} className={errors.email ? "error" : ""} />
+            {errors.email && <span className="error-text">{errors.email}</span>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="phone">Phone*</label>
+            <input id="phone" type="tel" name="phone" placeholder="Enter phone number" value={form.phone} onChange={handleChange} className={errors.phone ? "error" : ""} />
+            {errors.phone && <span className="error-text">{errors.phone}</span>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="skypeId">Skype ID (Optional)</label>
+            <input id="skypeId" type="text" name="skypeId" placeholder="Enter Skype ID" value={form.skypeId} onChange={handleChange} />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="rate">Desired Rate ($/hr)*</label>
+            <input id="rate" type="number" name="rate" placeholder="Enter rate in $/hr" value={form.rate} onChange={handleChange} className={errors.rate ? "error" : ""} />
+            {errors.rate && <span className="error-text">{errors.rate}</span>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="currentLocation">Location (City, State)*</label>
+            <input id="currentLocation" type="text" name="currentLocation" placeholder="Enter location" value={form.currentLocation} onChange={handleChange} className={errors.currentLocation ? "error" : ""} />
+            {errors.currentLocation && <span className="error-text">{errors.currentLocation}</span>}
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="availability">Availability (e.g., Immediate)*</label>
+            <input id="availability" type="text" name="availability" placeholder="Enter availability" value={form.availability} onChange={handleChange} className={errors.availability ? "error" : ""} />
+            {errors.availability && <span className="error-text">{errors.availability}</span>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="githubProfile">GitHub URL (Optional)</label>
+            <input id="githubProfile" type="url" name="githubProfile" placeholder="Enter GitHub profile URL" value={form.githubProfile} onChange={handleChange} />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="linkedinProfile">LinkedIn URL (Optional)</label>
+            <input id="linkedinProfile" type="url" name="linkedinProfile" placeholder="Enter LinkedIn profile URL" value={form.linkedinProfile} onChange={handleChange} />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="company">Company Name (Optional)</label>
+            <input id="company" type="text" name="company" placeholder="Enter company name" value={form.company} onChange={handleChange} />
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="hiringManager">Hiring Manager (Optional)</label>
+            <input id="hiringManager" type="text" name="hiringManager" placeholder="Enter hiring manager name" value={form.hiringManager} onChange={handleChange} />
+          </div>
+
+          {/* --- ✅ NEW: Dropdowns --- */}
+          <div className="form-group">
+            <label>Select Position *</label>
+            <select name="positionId" value={form.positionId} onChange={handleChange} required className={errors.positionId ? "error" : ""}>
+              <option value="">-- Select a position --</option>
+              {positions.map(pos => (
+                <option key={pos._id} value={pos._id}>{pos.title} ({pos.department})</option>
+              ))}
+            </select>
+            {errors.positionId && <span className="error-text">{errors.positionId}</span>}
+          </div>
+
+          <div className="form-group">
+            <label>Select Hiring Manager (to notify) *</label>
+            <select name="hiringManagerId" value={form.hiringManagerId} onChange={handleChange} required className={errors.hiringManagerId ? "error" : ""}>
+              <option value="">-- Select a manager --</option>
+              {managers.map(mgr => (
+                <option key={mgr._id} value={mgr._id}>
+                  {mgr.profile.firstName} {mgr.profile.lastName} ({mgr.email})
+                </option>
+              ))}
+            </select>
+            {errors.hiringManagerId && <span className="error-text">{errors.hiringManagerId}</span>}
+          </div>
+          {/* --- End of Dropdowns --- */}
 
           <div className="form-group file-upload">
             <label className="file-label" htmlFor="resume">
-              📎 Upload Resume (PDF)*
+              📎 Upload Resume (PDF, DOC, DOCX)*
             </label>
             <input
               id="resume"
               type="file"
-              accept=".pdf"
-              onChange={(e) => setFile(e.target.files[0])}
+              accept=".pdf,.doc,.docx"
+              onChange={handleFileChange}
             />
             {errors.file && <span className="error-text">{errors.file}</span>}
           </div>
           
           {message && (
-          <p
-            className={`resume-upload-message ${message.startsWith("✅") ? "success-text" : "error-text"
-              }`}
-          >
-            {message}
-          </p>
-        )}
+            <p className={`resume-upload-message ${message.startsWith("✅") ? "success-text" : "error-text"}`}>
+              {message}
+            </p>
+          )}
 
           <button type="submit" className="resume-upload-btn" disabled={loading}>
             {loading ? "Submitting..." : "Send Resume"}

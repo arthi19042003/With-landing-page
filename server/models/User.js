@@ -1,3 +1,4 @@
+// [File: arthi19042003/with-landing-page/With-landing-page-0f24402f43f461a8bca04af752e98da1034a70d5/server/models/User.js]
 // server/models/User.js
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
@@ -74,14 +75,30 @@ const UserSchema = new mongoose.Schema({
       }]
     }],
 
-    // --- Recruiter Fields ---
+    // --- Recruiter Fields (FIXED) ---
     agencyName: { type: String, default: '' },
-    majorSkills: [{ type: String }],
+    
+    // ✅ FIX: Changed from 'majorSkills' to 'majorskillsarea'
+    majorskillsarea: [{ type: String }], 
+    
+    // ✅ ADDED: This field was missing from the schema
+    resumeskills: { type: String, default: '' }, 
+
     partnerships: [{ type: String }],
     companyCertifications: [{ type: String }],
     dunsNumber: { type: String, default: '' },
-    employeeCount: { type: String, default: '' },
-    rateCard: { type: String, default: '' }, // Simplified as text for now
+    
+    // ✅ FIX: Changed from 'employeeCount' to 'numberofemployees'
+    numberofemployees: { type: String, default: '' }, 
+    
+    // ✅ FIX: Changed 'rateCard' (String) to 'ratecards' (Array of Objects)
+    ratecards: [{ 
+      role: String, 
+      lpa: String 
+    }],
+    
+    // ✅ ADDED: This field was missing from the schema but used in the form
+    location: { type: String, default: '' },
   },
   createdAt: {
     type: Date,
