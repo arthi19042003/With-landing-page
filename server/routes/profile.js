@@ -1,4 +1,3 @@
-// server/routes/profile.js
 const express = require("express");
 const router = express.Router();
 const auth = require("../middleware/auth");
@@ -9,7 +8,7 @@ const User = require("../models/User");
 // =========================
 router.get("/", auth, async (req, res) => {
   try {
-    // req.userId is attached by the auth middleware
+    // req.userId comes from the fixed auth middleware
     const user = await User.findById(req.userId).select("-password"); 
     if (!user) {
         return res.status(404).json({ success: false, message: "User not found" });
@@ -33,24 +32,23 @@ router.put("/", auth, async (req, res) => {
 
     // Merge new profile data with existing profile data
     const updatedProfile = {
-      ...user.profile.toObject(), // Get existing profile data
-      ...req.body // Overwrite with new data from request
+      ...user.profile.toObject(), 
+      ...req.body 
     };
 
     user.profile = updatedProfile;
     
-    // ❌ THIS WAS THE BUG - REMOVE THIS LINE
-    // user.password = undefined; 
+    // ✅ FIX: Do NOT set user.password = undefined here. 
+    // It causes validation errors on save().
     
-    await user.save(); // ✅ This will now work
+    await user.save(); 
     
-    // This line correctly refetches the user *without* the password
     const updatedUser = await User.findById(req.userId).select("-password"); 
 
     res.json({ 
       success: true, 
       message: "Profile updated successfully", 
-      user: updatedUser // Send back the full updated user object
+      user: updatedUser 
     });
   } catch (error) {
     console.error("Update profile error:", error.message);
@@ -64,6 +62,8 @@ router.put("/", auth, async (req, res) => {
 router.post("/experience", auth, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
     if (!user.profile.experience) user.profile.experience = [];
     user.profile.experience.push(req.body);
     await user.save();
@@ -80,6 +80,8 @@ router.post("/experience", auth, async (req, res) => {
 router.put("/experience/:id", auth, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
     const exp = user.profile.experience.id(req.params.id);
     if (!exp) return res.status(404).json({ success: false, message: "Experience not found" });
 
@@ -98,6 +100,8 @@ router.put("/experience/:id", auth, async (req, res) => {
 router.delete("/experience/:id", auth, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
     user.profile.experience.pull(req.params.id);
     await user.save();
     res.json({ success: true, experience: user.profile.experience });
@@ -113,6 +117,8 @@ router.delete("/experience/:id", auth, async (req, res) => {
 router.post("/education", auth, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
     if (!user.profile.education) user.profile.education = [];
     user.profile.education.push(req.body);
     await user.save();
@@ -129,6 +135,8 @@ router.post("/education", auth, async (req, res) => {
 router.put("/education/:id", auth, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
     const edu = user.profile.education.id(req.params.id);
     if (!edu) return res.status(404).json({ success: false, message: "Education not found" });
 
@@ -147,6 +155,8 @@ router.put("/education/:id", auth, async (req, res) => {
 router.delete("/education/:id", auth, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
     user.profile.education.pull(req.params.id);
     await user.save();
     res.json({ success: true, education: user.profile.education });

@@ -57,10 +57,7 @@ export default function Navbar() {
               {role === 'hiringmanager' && (
                 <>
                   <Link to="/hiring-manager/dashboard" className="navbar-link">Dashboard</Link>
-                  <Link to="/hiring-manager/open-positions" className="navbar-link">Positions</Link>
-                  <Link to="/hiring-manager/applications" className="navbar-link">Applications</Link>
-                  <Link to="/hiring-manager/purchase-orders" className="navbar-link">POs</Link>
-                  <Link to="/hiring-manager/inbox" className="navbar-link">Inbox</Link>
+                  {/* Links removed as requested to clean up UI */}
                 </>
               )}
               

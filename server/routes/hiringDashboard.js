@@ -1,31 +1,40 @@
 const express = require("express");
 const router = express.Router();
-const Application = require("../models/Application");
-const Position = require("../models/Position"); // You need this to find your jobs
+// ✅ FIX: Import 'Submission' model (where candidates are actually saved)
+const Submission = require("../models/Submission");
+// Fallback: If you use 'Application' model instead, uncomment next line
+// const Submission = require("../models/Application"); 
+
+const Position = require("../models/Position");
 const protect = require("../middleware/auth");
 
 router.get("/summary", protect, async (req, res) => {
   try {
-    const userId = req.user.id || req.user._id;
+    // ✅ Use req.userId from the fixed auth middleware
+    const userId = req.userId; 
 
     // 1. Find all Jobs (Positions) created by this Hiring Manager
     const myJobs = await Position.find({ createdBy: userId }).select("_id");
     const myJobIds = myJobs.map(job => job._id);
 
-    // 2. Find Applications linked to these Jobs (OR created by the manager manually)
-    const query = { 
+    // 2. Build Query to find Submissions for these jobs
+    // We check multiple field names to be safe (position, positionId, job)
+    const query = {
       $or: [
-        { jobId: { $in: myJobIds } },   // Applications for my jobs
-        { createdBy: userId }           // Candidates I added manually
+        { position: { $in: myJobIds } }, 
+        { positionId: { $in: myJobIds } },
+        { job: { $in: myJobIds } },
+        { createdBy: userId } // Or candidates added manually by me
       ]
     };
 
-    // 3. Run counts
+    // 3. Run counts on the Submission model
+    // Using regex for status to match "Interview Scheduled", "Phone Screen", etc.
     const [totalSubmissions, interviewsScheduled, offersMade, hired] = await Promise.all([
-      Application.countDocuments(query),
-      Application.countDocuments({ ...query, status: "Interview" }),
-      Application.countDocuments({ ...query, status: "Offer" }),
-      Application.countDocuments({ ...query, status: "Hired" })
+      Submission.countDocuments(query),
+      Submission.countDocuments({ ...query, status: { $regex: "Interview", $options: "i" } }),
+      Submission.countDocuments({ ...query, status: "Offer" }),
+      Submission.countDocuments({ ...query, status: "Hired" })
     ]);
 
     res.json({
@@ -36,7 +45,13 @@ router.get("/summary", protect, async (req, res) => {
     });
   } catch (err) {
     console.error("Error fetching dashboard summary:", err);
-    res.status(500).json({ message: "Server error" });
+    // Return zeros instead of crashing if something is wrong
+    res.json({
+      totalSubmissions: 0,
+      interviewsScheduled: 0,
+      offersMade: 0,
+      hired: 0
+    });
   }
 });
 

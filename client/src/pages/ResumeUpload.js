@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// ✅ FIX: Import the configured 'api' instance instead of 'axios'
+// ✅ Keep using your configured api instance
 import api from '../api/axios'; 
 import './ResumeUpload.css';
 
@@ -16,8 +16,13 @@ const ResumeUpload = () => {
 
   const fetchResumes = async () => {
     try {
-      // ✅ FIX: Use 'api'
-      const response = await api.get('/resume'); // No /api/ prefix needed
+      // ✅ Ensure token is attached if api interceptor fails
+      const token = localStorage.getItem('token');
+      const config = {
+        headers: { Authorization: `Bearer ${token}` }
+      };
+      
+      const response = await api.get('/resume', config); 
       setResumes(response.data);
     } catch (error) {
       console.error('Error fetching resumes:', error);
@@ -28,13 +33,11 @@ const ResumeUpload = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const allowedTypes = [
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    ];
+    // Frontend validation
+    const allowedExtensions = ['pdf', 'doc', 'docx'];
+    const fileExtension = file.name.split('.').pop().toLowerCase();
 
-    if (!allowedTypes.includes(file.type)) {
+    if (!allowedExtensions.includes(fileExtension)) {
       setMessage({ type: 'error', text: 'Only PDF, DOC & DOCX allowed' });
       return;
     }
@@ -62,28 +65,40 @@ const ResumeUpload = () => {
     setLoading(true);
 
     try {
-      // ✅ FIX: Use 'api' and remove '/api/' prefix
-      // This will now send the Authorization token
+      const token = localStorage.getItem('token');
+      
+      // ✅ FIX: Explicitly set multipart/form-data header
       await api.post('/resume/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+        headers: { 
+            'Content-Type': 'multipart/form-data',
+            'Authorization': `Bearer ${token}` // Ensure token is sent
+        }
       });
 
       setMessage({ type: 'success', text: 'Resume uploaded successfully ✅' });
       setSelectedFile(null);
       setTitle('');
       fetchResumes();
+      
       // Clear the file input
       const fileInput = document.getElementById('resume-file');
       if (fileInput) fileInput.value = "";
 
     } catch (error) {
-      // Check if the error is from the server
-      if (error.response && error.response.status === 401) {
-        setMessage({ type: 'error', text: 'Authentication failed. Please log in again.' });
-      } else {
-        setMessage({ type: 'error', text: 'Upload failed!' });
-      }
       console.error("Upload error:", error);
+      
+      if (error.response) {
+        // Server responded with a status code
+        if (error.response.status === 401) {
+            setMessage({ type: 'error', text: 'Session expired. Please log in.' });
+        } else if (error.response.status === 400) {
+            setMessage({ type: 'error', text: error.response.data.message || 'Invalid file format.' });
+        } else {
+            setMessage({ type: 'error', text: 'Server error. Try again later.' });
+        }
+      } else {
+        setMessage({ type: 'error', text: 'Network error. Check your connection.' });
+      }
     } finally {
       setLoading(false);
     }
@@ -91,8 +106,10 @@ const ResumeUpload = () => {
 
   const handleSetActive = async (id) => {
     try {
-      // ✅ FIX: Use 'api' and remove '/api/' prefix
-      await api.put(`/resume/active/${id}`);
+      const token = localStorage.getItem('token');
+      await api.put(`/resume/active/${id}`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setMessage({ type: 'success', text: 'Set as active ✅' });
       fetchResumes();
     } catch {
@@ -104,8 +121,10 @@ const ResumeUpload = () => {
     if (!window.confirm("Delete this resume?")) return;
 
     try {
-      // ✅ FIX: Use 'api' and remove '/api/' prefix
-      await api.delete(`/resume/${id}`);
+      const token = localStorage.getItem('token');
+      await api.delete(`/resume/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setMessage({ type: 'success', text: 'Deleted ✅' });
       fetchResumes();
     } catch {

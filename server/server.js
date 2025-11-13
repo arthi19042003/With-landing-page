@@ -7,6 +7,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const mongoose = require("mongoose"); // ✅ Added mongoose import
 const connectDB = require("./config/db");
 
 // ===============================================
@@ -23,10 +24,27 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // ===============================================
-// MongoDB Connection
+// MongoDB Connection & Auto-Fix for PO Error
 // ===============================================
 connectDB()
-  .then(() => console.log("✅ MongoDB Connected Successfully"))
+  .then(async () => {
+    console.log("✅ MongoDB Connected Successfully");
+
+    // 🛠️ AUTO-FIX: Remove the old 'poId' rule that is blocking you
+    try {
+      const collection = mongoose.connection.collection("purchaseorders");
+      const indexes = await collection.indexes();
+      const indexExists = indexes.some((idx) => idx.name === "poId_1");
+
+      if (indexExists) {
+        console.log("⚠️ Found conflicting index 'poId_1'. Dropping it...");
+        await collection.dropIndex("poId_1");
+        console.log("✅ Index 'poId_1' dropped. You can now create POs!");
+      }
+    } catch (err) {
+      // Ignore errors if collection/index doesn't exist yet
+    }
+  })
   .catch((err) => {
     console.error("❌ MongoDB Connection Failed:", err.message);
     process.exit(1);
@@ -56,15 +74,12 @@ app.use("/api/employer", require("./routes/employerRoutes"));
 // ===============================================
 // Hiring Manager Routes (Integrated from New HR)
 // ===============================================
-// These replace the old generic /api/hiringManager routes
 app.use("/api/hiring-dashboard", protect, require("./routes/hiringDashboard"));
 app.use("/api/positions", protect, require("./routes/positions"));
 app.use("/api/purchase-orders", protect, require("./routes/purchaseOrders"));
 app.use("/api/applications", protect, require("./routes/applications"));
 app.use("/api/onboarding", protect, require("./routes/onboarding"));
 app.use("/api/agencies", protect, require("./routes/agencies"));
-// Note: If you have specific legacy manager logic, check 'routes/managerRoutes' 
-// before deleting it, but the new files above should cover the features.
 
 // ===============================================
 // Recruiter Routes (Protected)

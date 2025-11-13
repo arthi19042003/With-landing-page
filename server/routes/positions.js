@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const Position = require("../models/Position");
-// ✅ Fix Import
 const protect = require("../middleware/auth"); 
 
 // ✅ GET positions

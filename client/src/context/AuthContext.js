@@ -1,5 +1,3 @@
-// [File: arthi19042003/with-landing-page/With-landing-page-0f24402f43f461a8bca04af752e98da1034a70d5/client/src/context/AuthContext.js]
-// client/src/context/AuthContext.js
 import React, { createContext, useContext, useState, useEffect } from "react";
 import api from "../api/axios"; // Using the configured axios instance
 

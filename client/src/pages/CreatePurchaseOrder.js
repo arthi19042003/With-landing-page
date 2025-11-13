@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Container, Card, Form, Button, Row, Col, Spinner } from "react-bootstrap";
+import toast, { Toaster } from "react-hot-toast";
+import './HiringManagerDashboard.css'; // Import shared CSS
 
 export default function CreatePurchaseOrder() {
   const navigate = useNavigate();
@@ -14,18 +17,19 @@ export default function CreatePurchaseOrder() {
 
   const [submitting, setSubmitting] = useState(false);
 
-  // ✅ Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  // ✅ Submit form to backend
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.candidateName || !formData.positionTitle || !formData.startDate) {
-      alert("⚠️ Candidate Name, Position Title, and Start Date are required.");
-      return;
+    
+    // ✅ Get token from localStorage
+    const token = localStorage.getItem("token");
+    if (!token) {
+        toast.error("Please login first.");
+        return;
     }
 
     try {
@@ -34,7 +38,7 @@ export default function CreatePurchaseOrder() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`, // ✅ Send token
         },
         body: JSON.stringify({
           candidateName: formData.candidateName,
@@ -45,124 +49,75 @@ export default function CreatePurchaseOrder() {
         }),
       });
 
-      if (!res.ok) throw new Error("Failed to create PO");
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to create PO");
+      }
 
-      setFormData({
-        candidateName: "",
-        positionTitle: "",
-        department: "",
-        rate: "",
-        startDate: "",
-      });
-
-      alert("✅ Purchase Order created successfully!");
-      navigate("/purchase-orders"); // redirect after success
+      toast.success("Purchase Order created successfully!");
+      navigate("/hiring-manager/purchase-orders"); 
+      
     } catch (err) {
       console.error("Error creating PO:", err);
-      alert("❌ Failed to create PO");
+      toast.error(err.message);
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="p-8 max-w-4xl mx-auto bg-white rounded-xl shadow-md">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800">
-          🧾 Create Purchase Order
-        </h2>
-        <button
-          onClick={() => navigate(-1)}
-          className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded"
-        >
-          ← Back
-        </button>
-      </div>
-
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Candidate Name *
-          </label>
-          <input
-            type="text"
-            name="candidateName"
-            value={formData.candidateName}
-            onChange={handleChange}
-            required
-            className="w-full border rounded-lg p-2"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Position Title *
-          </label>
-          <input
-            type="text"
-            name="positionTitle"
-            value={formData.positionTitle}
-            onChange={handleChange}
-            required
-            className="w-full border rounded-lg p-2"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Department
-          </label>
-          <input
-            type="text"
-            name="department"
-            value={formData.department}
-            onChange={handleChange}
-            className="w-full border rounded-lg p-2"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Rate ($/hr)
-          </label>
-          <input
-            type="number"
-            name="rate"
-            value={formData.rate}
-            onChange={handleChange}
-            className="w-full border rounded-lg p-2"
-            placeholder="e.g. 75"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Start Date *
-          </label>
-          <input
-            type="date"
-            name="startDate"
-            value={formData.startDate}
-            onChange={handleChange}
-            required
-            className="w-full border rounded-lg p-2"
-          />
-        </div>
-
-        <div className="flex items-end">
-          <button
-            type="submit"
-            disabled={submitting}
-            className={`w-full md:w-auto px-6 py-3 font-semibold rounded-lg shadow ${
-              submitting
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700 text-white"
-            }`}
-          >
-            {submitting ? "Submitting..." : "Generate PO"}
-          </button>
-        </div>
-      </form>
+    // ✅ Wrapper for layout and style
+    <div className="dashboard-wrapper">
+      <Container className="py-4">
+        <Toaster position="top-right" />
+        <Card className="shadow-sm border-0" style={{ maxWidth: "800px", margin: "0 auto" }}>
+          <Card.Body className="p-4">
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h2 className="fw-bold text-dark mb-0">🧾 Create Purchase Order</h2>
+              <Button variant="light" onClick={() => navigate(-1)} className="border">← Back</Button>
+            </div>
+            <Form onSubmit={handleSubmit}>
+              <Row className="g-3">
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Label>Candidate Name *</Form.Label>
+                    <Form.Control type="text" name="candidateName" value={formData.candidateName} onChange={handleChange} required />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Label>Position Title *</Form.Label>
+                    <Form.Control type="text" name="positionTitle" value={formData.positionTitle} onChange={handleChange} required />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Label>Department</Form.Label>
+                    <Form.Control type="text" name="department" value={formData.department} onChange={handleChange} />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Label>Rate ($/hr)</Form.Label>
+                    <Form.Control type="number" name="rate" value={formData.rate} onChange={handleChange} />
+                  </Form.Group>
+                </Col>
+                <Col md={12}>
+                  <Form.Group>
+                    <Form.Label>Start Date *</Form.Label>
+                    <Form.Control type="date" name="startDate" value={formData.startDate} onChange={handleChange} required />
+                  </Form.Group>
+                </Col>
+                <Col md={12} className="mt-4">
+                  <Button type="submit" variant="primary" size="lg" className="w-100" disabled={submitting}>
+                    {submitting ? <Spinner animation="border" size="sm" /> : "Generate PO"}
+                  </Button>
+                </Col>
+              </Row>
+            </Form>
+          </Card.Body>
+        </Card>
+      </Container>
     </div>
   );
 }

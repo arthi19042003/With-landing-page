@@ -1,42 +1,26 @@
 // server/models/PurchaseOrder.js
 const mongoose = require("mongoose");
-const { Schema } = mongoose;
 
-const PurchaseOrderSchema = new Schema({
-  poNumber: { 
-    type: String, 
-    required: true, 
-    unique: true 
+const PurchaseOrderSchema = new mongoose.Schema(
+  {
+    poNumber: { type: String, required: true, unique: true }, // We use poNumber now
+    candidateName: { type: String, required: true },
+    positionTitle: { type: String, required: true },
+    department: { type: String },
+    rate: { type: Number, required: true },
+    startDate: { type: Date, required: true },
+    status: {
+      type: String,
+      enum: ["Pending", "Approved", "Rejected", "Draft", "Sent", "Paid", "Cancelled"],
+      default: "Pending",
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
-  candidateName: { 
-    type: String, 
-    required: true 
-  },
-  position: { 
-    type: String, 
-    required: true 
-  },
-  agencyName: { 
-    type: String 
-  },
-  amount: { 
-    type: Number, 
-    required: true 
-  },
-  status: { 
-    type: String, 
-    enum: ["Draft", "Sent", "Paid", "Cancelled"], 
-    default: "Draft" 
-  },
-  createdBy: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: "User",
-    required: true
-  },
-  createdAt: { 
-    type: Date, 
-    default: Date.now 
-  }
-});
+  { timestamps: true }
+);
 
 module.exports = mongoose.model("PurchaseOrder", PurchaseOrderSchema);

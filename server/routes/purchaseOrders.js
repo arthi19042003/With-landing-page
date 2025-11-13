@@ -1,16 +1,12 @@
-// server/routes/purchaseOrders.js
 const express = require("express");
 const router = express.Router();
 const PurchaseOrder = require("../models/PurchaseOrder");
-const protect = require("../middleware/auth"); // ✅ Corrected Import
+const protect = require("../middleware/auth");
 
-/**
- * ✅ GET - Fetch all POs for the logged-in hiring manager
- */
+// ✅ GET All POs
 router.get("/", protect, async (req, res) => {
   try {
-    const userId = req.user.id || req.user._id;
-    const orders = await PurchaseOrder.find({ createdBy: userId }).sort({ createdAt: -1 });
+    const orders = await PurchaseOrder.find({ createdBy: req.user.id }).sort({ createdAt: -1 });
     res.json(orders);
   } catch (err) {
     console.error("Error fetching POs:", err);
@@ -18,49 +14,70 @@ router.get("/", protect, async (req, res) => {
   }
 });
 
-/**
- * ✅ POST - Create a new Purchase Order
- */
+// ✅ POST Create PO
 router.post("/", protect, async (req, res) => {
   try {
-    const userId = req.user.id || req.user._id;
+    const { candidateName, positionTitle, department, rate, startDate } = req.body;
 
-    // Basic validation
-    if (!req.body.poNumber || !req.body.candidateName || !req.body.amount) {
+    if (!candidateName || !positionTitle || !rate || !startDate) {
       return res.status(400).json({ message: "Please fill in all required fields." });
     }
 
+    // Auto-generate PO Number
+    const poNumber = `PO-${Math.floor(1000 + Math.random() * 9000)}`;
+
     const newOrder = new PurchaseOrder({
-      ...req.body,
-      createdBy: userId,
+      poNumber,
+      candidateName,
+      positionTitle,
+      department,
+      rate,
+      startDate,
+      status: "Pending",
+      createdBy: req.user.id,
     });
 
     await newOrder.save();
     res.status(201).json(newOrder);
   } catch (err) {
     console.error("Error creating PO:", err);
-    if (err.code === 11000) {
-      return res.status(400).json({ message: "PO Number already exists." });
+    res.status(500).json({ message: "Server Error creating PO" });
+  }
+});
+
+// ✅ PUT Update Status (This was missing!)
+router.put("/:id", protect, async (req, res) => {
+  try {
+    const { status } = req.body;
+    
+    const updatedPO = await PurchaseOrder.findOneAndUpdate(
+      { _id: req.params.id },
+      { status },
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedPO) {
+      return res.status(404).json({ message: "Purchase Order not found" });
     }
+
+    res.json(updatedPO);
+  } catch (err) {
+    console.error("Error updating PO:", err);
     res.status(500).json({ message: "Server Error" });
   }
 });
 
-/**
- * ✅ DELETE - Remove a PO
- */
+// ✅ DELETE PO
 router.delete("/:id", protect, async (req, res) => {
   try {
-    const userId = req.user.id || req.user._id;
     const deleted = await PurchaseOrder.findOneAndDelete({
       _id: req.params.id,
-      createdBy: userId,
+      createdBy: req.user.id,
     });
 
     if (!deleted) {
       return res.status(404).json({ message: "Purchase Order not found" });
     }
-
     res.json({ message: "Purchase Order deleted successfully" });
   } catch (err) {
     console.error("Error deleting PO:", err);

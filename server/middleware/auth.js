@@ -1,32 +1,34 @@
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
 
-const auth = async (req, res, next) => {
-  try {
-    const token =
-      req.header("Authorization")?.replace("Bearer ", "") ||
-      req.body.token;
+const protect = async (req, res, next) => {
+  let token;
 
-    if (!token) {
-      return res.status(401).json({ success: false, message: "Access denied. No token provided." });
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    try {
+      // Get token from header
+      token = req.headers.authorization.split(" ")[1];
+
+      // Verify token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      // ✅ FIX: Set req.user directly from the token payload
+      req.user = decoded; 
+      
+      // ✅ CRITICAL FIX: Handle both 'id' and 'userId' formats
+      // This ensures req.userId is ALWAYS defined for your routes
+      req.userId = decoded.id || decoded.userId;
+
+      next();
+    } catch (error) {
+      console.error("Auth Error:", error.message);
+      res.status(401).json({ message: "Not authorized, token failed" });
     }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    if (!decoded.userId) {
-      return res.status(401).json({ success: false, message: "Invalid token" });
-    }
-
-    const user = await User.findById(decoded.userId).select("-password");
-    if (!user) return res.status(404).json({ success: false, message: "User not found" });
-
-    req.userId = user._id; // use this in profile routes
-    req.user = user;       // optional: attach full user object
-    next();
-  } catch (err) {
-    console.error("Auth error:", err.message);
-    return res.status(401).json({ success: false, message: "Authentication failed" });
+  } else {
+    res.status(401).json({ message: "Not authorized, no token" });
   }
 };
 
-module.exports = auth;
+module.exports = protect;

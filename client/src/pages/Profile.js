@@ -96,6 +96,7 @@ const Profile = () => {
   const [showEduForm, setShowEduForm] = useState(false);
 
   useEffect(() => {
+    // ✅ FIX: Safety check using optional chaining to prevent crash
     if (user?.profile) {
       setFormData({
         firstName: user.profile.firstName || "",
@@ -192,6 +193,11 @@ const Profile = () => {
 
   // --- Experience Handlers ---
   const handleAddExperience = async () => {
+    // ✅ FIX: Ensure user exists before allowing adding
+    if (!user) {
+        alert("User data loading. Please wait.");
+        return;
+    }
     if (!validateSubForm('exp', newExp)) return;
     try {
       const res = await api.post('/profile/experience', newExp);
@@ -200,12 +206,14 @@ const Profile = () => {
       setShowExpForm(false);
     } catch (err) { console.error(err); }
   };
+
   const handleUpdateExperience = async (expData) => {
      try {
       const res = await api.put(`/profile/experience/${expData._id}`, expData);
       setExperience(res.data.experience);
     } catch (err) { console.error(err); }
   };
+
   const handleDeleteExperience = async (id) => {
     try {
       const res = await api.delete(`/profile/experience/${id}`);
@@ -215,6 +223,11 @@ const Profile = () => {
 
   // --- Education Handlers ---
    const handleAddEducation = async () => {
+    // ✅ FIX: Ensure user exists
+    if (!user) {
+        alert("User data loading. Please wait.");
+        return;
+    }
     if (!validateSubForm('edu', newEdu)) return;
     try {
       const res = await api.post('/profile/education', newEdu);
@@ -223,12 +236,14 @@ const Profile = () => {
       setShowEduForm(false);
     } catch (err) { console.error(err); }
   };
+
    const handleUpdateEducation = async (eduData) => {
      try {
       const res = await api.put(`/profile/education/${eduData._id}`, eduData);
       setEducation(res.data.education);
     } catch (err) { console.error(err); }
   };
+
   const handleDeleteEducation = async (id) => {
     try {
       const res = await api.delete(`/profile/education/${id}`);
@@ -236,12 +251,21 @@ const Profile = () => {
     } catch (err) { console.error(err); }
   };
 
+  // ✅ FIX: Render loading state if user is not loaded yet
+  if (!user) {
+    return (
+        <div className="profile-page-bg">
+            <div className="profile-container" style={{textAlign: "center", paddingTop: "50px"}}>
+                <p>Loading profile...</p>
+            </div>
+        </div>
+    );
+  }
+
   return (
     <div className="profile-page-bg">
       <div className="profile-container">
         <h1 className="profile-heading">Edit Profile</h1>
-
-        {/* --- ✅ MESSAGE MOVED FROM HERE --- */}
 
         {/* Personal Info Form */}
         <form onSubmit={handleSubmit}>
@@ -308,7 +332,6 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* --- ✅ MESSAGE MOVED HERE --- */}
           {message.text && (
             <div className={`form-message ${message.type}`}>
               {message.text}
