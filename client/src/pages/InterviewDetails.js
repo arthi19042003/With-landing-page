@@ -1,11 +1,10 @@
 // client/src/pages/InterviewDetails.js
 import React, { useEffect, useState } from "react";
 import { FaStar, FaEdit, FaTrash } from "react-icons/fa";
-import api from "../api/axios"; // ✅ Use your configured axios
+import api from "../api/axios";
 import "./InterviewDetails.css";
 
 function InterviewDetails() {
-  // ✅ 1. Added 'notifyManager' to initial state
   const initialState = {
     candidateFirstName: "",
     candidateLastName: "",
@@ -19,7 +18,7 @@ function InterviewDetails() {
     questionsAsked: "",
     notes: "",
     feedback: "",
-    notifyManager: false, 
+    notifyManager: false,
   };
 
   const [form, setForm] = useState(initialState);
@@ -33,9 +32,12 @@ function InterviewDetails() {
   const fetchInterviews = async () => {
     try {
       const { data } = await api.get("/interviews");
+      // Ensure data is an array to prevent crashes
       setInterviews(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Error fetching interviews:", err);
+      // Fallback to empty array on error
+      setInterviews([]);
     }
   };
 
@@ -43,7 +45,6 @@ function InterviewDetails() {
     fetchInterviews();
   }, []);
 
-  // ✅ 2. Updated handleChange to handle Checkbox input
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm((prev) => ({
@@ -83,14 +84,22 @@ function InterviewDetails() {
     setTimeout(() => setMessage(""), 2500);
   };
 
+  // ✅ SAFETY FIX: Handle invalid dates gracefully
   const handleEdit = (item) => {
-    const formattedDate = item.date ? new Date(item.date).toISOString().split("T")[0] : "";
-    // ✅ 3. Ensure notifyManager is set during edit
-    setForm({ 
-      ...item, 
-      date: formattedDate, 
+    let formattedDate = "";
+    if (item.date) {
+      try {
+        formattedDate = new Date(item.date).toISOString().split("T")[0];
+      } catch (e) {
+        console.warn("Invalid date found for interview:", item._id);
+      }
+    }
+
+    setForm({
+      ...item,
+      date: formattedDate,
       rating: Number(item.rating || 0),
-      notifyManager: item.notifyManager || false 
+      notifyManager: item.notifyManager || false,
     });
     setEditingId(item._id);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -109,12 +118,20 @@ function InterviewDetails() {
     setTimeout(() => setMessage(""), 2000);
   };
 
+  // ✅ SAFETY FIX: Prevent crash if fields are undefined/null
   const filteredData = interviews.filter((it) => {
     const searchValue = search.trim().toLowerCase();
+    
+    // Use default empty strings if data is missing
+    const fName = it.candidateFirstName || "";
+    const lName = it.candidateLastName || "";
+    const pos = it.jobPosition || "";
+
     const found =
-      it.candidateFirstName?.toLowerCase().includes(searchValue) ||
-      it.candidateLastName?.toLowerCase().includes(searchValue) ||
-      it.jobPosition?.toLowerCase().includes(searchValue);
+      fName.toLowerCase().includes(searchValue) ||
+      lName.toLowerCase().includes(searchValue) ||
+      pos.toLowerCase().includes(searchValue);
+      
     const statusMatch = filterStatus === "All" || it.status === filterStatus;
     return found && statusMatch;
   });
@@ -125,7 +142,6 @@ function InterviewDetails() {
         <h2 className="form-title">{editingId ? "Update Interview" : "Interviewer Details"}</h2>
 
         <form onSubmit={handleSubmit}>
-
           {/* Section: Candidate Info */}
           <h3 className="section-label">Candidate Information</h3>
           <div className="grid-2">
@@ -218,7 +234,6 @@ function InterviewDetails() {
             <textarea name="feedback" value={form.feedback} onChange={handleChange} />
           </div>
 
-          {/* ✅ 4. New Checkbox for Notify Manager */}
           <div className="form-field" style={{ flexDirection: "row", alignItems: "center", gap: "10px", marginTop: "15px" }}>
             <input
               type="checkbox"
@@ -229,7 +244,7 @@ function InterviewDetails() {
               style={{ width: "20px", height: "20px", margin: 0, cursor: "pointer" }}
             />
             <label htmlFor="notifyManager" style={{ marginBottom: "0", cursor: "pointer", fontSize: "1rem", color: "#333" }}>
-              Notify Manager
+              Notify Hiring Manager
             </label>
           </div>
 
@@ -271,11 +286,19 @@ function InterviewDetails() {
         ) : (
           filteredData.map((it) => (
             <div className="table-row" key={it._id}>
-              <span>{it.candidateFirstName} {it.candidateLastName}</span>
-              <span>{it.date ? new Date(it.date).toLocaleDateString() : "N/A"}</span>
-              <span>{it.jobPosition}</span>
-              <span className={`badge ${it.status?.toLowerCase()}`}>{it.status}</span>
-              <span className={`badge ${it.result?.toLowerCase()}`}>{it.result}</span>
+              {/* ✅ Safe Field Access */}
+              <span>{it.candidateFirstName || ""} {it.candidateLastName || ""}</span>
+              
+              {/* ✅ Safe Date Rendering */}
+              <span>
+                {it.date && !isNaN(new Date(it.date)) 
+                  ? new Date(it.date).toLocaleDateString() 
+                  : "N/A"}
+              </span>
+              
+              <span>{it.jobPosition || "N/A"}</span>
+              <span className={`badge ${it.status?.toLowerCase()}`}>{it.status || "Pending"}</span>
+              <span className={`badge ${it.result?.toLowerCase()}`}>{it.result || "Pending"}</span>
               <span>⭐ {Number(it.rating || 0)}</span>
 
               <div className="row-actions">

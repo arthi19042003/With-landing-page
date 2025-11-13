@@ -1,7 +1,5 @@
-// client/src/pages/ApplicationsDashboard.js
 import React, { useEffect, useState } from "react";
 import {
-  Card,
   Button,
   Form,
   Spinner,
@@ -25,6 +23,16 @@ export default function ApplicationsDashboard() {
   const [history, setHistory] = useState([]);
   
   const token = localStorage.getItem("token"); 
+
+  // ✅ Reusable style for Purple Buttons
+  const purpleBtnStyle = {
+    backgroundColor: "#6d28d9", // Purple
+    borderColor: "#6d28d9",
+    color: "#fff", // White text
+    width: "100%",
+    marginBottom: "5px",
+    fontWeight: "500"
+  };
 
   const fetchApplications = async () => {
     if (!token) {
@@ -103,28 +111,30 @@ export default function ApplicationsDashboard() {
     );
 
   return (
-    <div className="container mt-4" style={{ paddingTop: "80px" }}>
+    // ✅ Added more paddingTop and minHeight
+    <div className="container mt-4" style={{ paddingTop: "120px", minHeight: "100vh" }}>
       <Toaster position="top-right" />
-      <h2 className="mb-4">📬 Candidate Applications</h2>
+      <h2 className="mb-4" style={{ color: "#5b21b6", fontWeight: "700" }}>📬 Candidate Applications</h2>
 
       {applications.length === 0 ? (
         <p className="text-muted">No applications found.</p>
       ) : (
-        <Table striped bordered hover responsive className="shadow-sm bg-white rounded">
+        <Table striped bordered hover responsive className="shadow-sm bg-white rounded align-middle">
           <thead className="table-light">
             <tr>
               <th>Candidate</th>
               <th>Position</th>
               <th>Status</th>
               <th>Interview</th>
-              <th>Actions</th>
+              <th style={{ width: "250px" }}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {applications.map((app) => (
               <tr key={app._id}>
                 <td>
-                  <strong>{app.candidateName}</strong>
+                  {/* ✅ Added fallback for missing name */}
+                  <strong>{app.candidateName || "Name Unavailable"}</strong>
                   <div className="text-muted small">{app.email}</div>
                 </td>
                 <td>{app.position}</td>
@@ -151,20 +161,20 @@ export default function ApplicationsDashboard() {
                     : "-"}
                 </td>
                 <td>
-                  <div className="d-flex flex-wrap gap-2">
+                  {/* ✅ Changed to flex-column for stacked buttons */}
+                  <div className="d-flex flex-column">
                     <Button
                       size="sm"
-                      variant="outline-primary"
+                      style={purpleBtnStyle}
                       onClick={() => handleViewResume(app.resumeUrl)}
                     >
                       📄 Resume
                     </Button>
                     
-                    {/* ✅ REVIEW BUTTON */}
                     {app.status === "Applied" && (
                       <Button
                         size="sm"
-                        variant="outline-primary"
+                        style={purpleBtnStyle}
                         onClick={() => updateStatus(app._id, "review")}
                       >
                         Review
@@ -173,7 +183,7 @@ export default function ApplicationsDashboard() {
 
                     <Button
                       size="sm"
-                      variant="outline-warning"
+                      style={purpleBtnStyle}
                       onClick={() => {
                         setSelectedApp(app);
                         setShowScheduleModal(true);
@@ -182,11 +192,10 @@ export default function ApplicationsDashboard() {
                       Schedule
                     </Button>
                     
-                    {/* Reject Button */}
                     {app.status !== "Rejected" && app.status !== "Hired" && (
                        <Button
                         size="sm"
-                        variant="outline-danger"
+                        style={{...purpleBtnStyle, backgroundColor: "#7c3aed"}} // Lighter purple for variety
                         onClick={() => {
                           if (window.confirm("Are you sure you want to reject this candidate?")) {
                             updateStatus(app._id, "reject");
@@ -197,28 +206,27 @@ export default function ApplicationsDashboard() {
                       </Button>
                     )}
                    
-                    {/* ✅ HISTORY BUTTON */}
                     <Button
                       size="sm"
-                      variant="outline-info"
+                      style={purpleBtnStyle}
                       onClick={() => handleViewHistory(app.email)}
                     >
                       History
                     </Button>
                     
-                    {/* Hire Button */}
                     {app.status === "Hired" ? (
                       <Button
                         size="sm"
                         variant="success"
                         disabled
+                        style={{ width: "100%" }}
                       >
-                        Onboarding: {app.onboardingStatus}
+                        Hired ({app.onboardingStatus})
                       </Button>
                     ) : (
                       <Button
                         size="sm"
-                        variant="success"
+                        style={purpleBtnStyle}
                         onClick={() => {
                            if (window.confirm("Are you sure you want to hire this candidate?")) {
                             updateStatus(app._id, "hire");

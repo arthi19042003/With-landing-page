@@ -18,7 +18,8 @@ export default function Navbar() {
   const role = (user?.role || 'candidate').toLowerCase();
 
   return (
-    <nav className="navbar">
+    // ✅ CHANGED: className="custom-navbar" to avoid Bootstrap conflict
+    <nav className="custom-navbar">
       <div className="navbar-container">
         <HashLink smooth to={user ? '/dashboard' : '/#top'} className="navbar-logo">
           Smart Submissions
@@ -40,7 +41,7 @@ export default function Navbar() {
               {role === 'candidate' && (
                 <>
                   <Link to="/dashboard" className="navbar-link">Dashboard</Link>
-                  <Link to="/candidate/jobs" className="navbar-link">Jobs</Link> {/* ✅ ADDED LINK */}
+                  <Link to="/candidate/jobs" className="navbar-link">Jobs</Link>
                   <Link to="/profile" className="navbar-link">Profile</Link>
                   <Link to="/resume" className="navbar-link">Resume</Link>
                   <Link to="/interviews" className="navbar-link">Interviews</Link>

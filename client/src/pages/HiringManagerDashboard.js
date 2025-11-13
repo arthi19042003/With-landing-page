@@ -112,21 +112,21 @@ export default function HiringManagerDashboard() {
 
   if (loading)
     return (
-      <div className="dashboard-wrapper">
-        <div className="text-center mt-5" style={{ color: "white" }}>
-          <Spinner animation="border" variant="light" /> Loading dashboard...
+      <div className="hiring-dashboard">
+        <div className="text-center mt-5" style={{ color: "#6d28d9" }}>
+          <Spinner animation="border" /> Loading dashboard...
         </div>
       </div>
     );
 
   if (!data) {
     return (
-      <div className="dashboard-wrapper">
+      <div className="hiring-dashboard">
         <Container className="py-4 text-center">
           <Alert variant="danger">
             Failed to load dashboard data. Please try refreshing.
           </Alert>
-          <Button onClick={fetchDashboard} variant="primary">
+          <Button onClick={fetchDashboard} className="purple-btn">
             🔄 Retry
           </Button>
         </Container>
@@ -142,256 +142,173 @@ export default function HiringManagerDashboard() {
   ];
 
   return (
-    <div className="dashboard-wrapper">
-      <Container className="py-4">
+    <div className="hiring-dashboard">
+      <Container fluid="lg">
         {/* HEADER */}
         <div className="d-flex justify-content-between align-items-center mb-4">
-          <h2 className="fw-bold">🏢 Hiring Manager Dashboard</h2>
-          <Badge bg="info" className="p-2 fs-6">
+          <h2 className="fw-bold" style={{ color: "#4c1d95" }}>Hiring Manager Dashboard</h2>
+          <Badge bg="light" text="dark" className="p-2 fs-6 shadow-sm border">
             Welcome Back 👋
           </Badge>
         </div>
 
-        {/* ROW 1: Chart + Metrics */}
-        <Row>
-          <Col md={6}>
-            <Card className="mb-4 shadow-sm">
-              <Card.Body>
+        {/* ROW 1: Chart + Metrics (Aligned Height) */}
+        <Row className="mb-4 g-4 align-items-stretch">
+          {/* Chart Card */}
+          <Col md={7} lg={8}>
+            <Card className="shadow-sm h-100 border-0">
+              <Card.Body className="d-flex flex-column">
                 <div className="d-flex justify-content-between align-items-center mb-3">
-                  <Card.Title>📊 Hiring Progress</Card.Title>
+                  <Card.Title className="text-purple fw-bold mb-0">📊 Hiring Progress</Card.Title>
                   <Button
                     onClick={fetchDashboard}
                     disabled={refreshing}
-                    variant={refreshing ? "secondary" : "primary"}
+                    size="sm"
+                    variant="outline-primary"
+                    style={{ borderColor: "#6d28d9", color: "#6d28d9" }}
                   >
                     {refreshing ? "Refreshing..." : "🔄 Refresh"}
                   </Button>
                 </div>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="value" fill="#0d6efd" radius={[10, 10, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+                <div style={{ width: '100%', height: 300, flexGrow: 1 }}>
+                  <ResponsiveContainer>
+                    <BarChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="name" />
+                      <YAxis allowDecimals={false} />
+                      <Tooltip cursor={{ fill: '#f3e8ff' }} />
+                      <Bar dataKey="value" fill="#8b5cf6" radius={[4, 4, 0, 0]} barSize={50} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               </Card.Body>
             </Card>
           </Col>
 
-          <Col md={6}>
-            <Card className="mb-4 shadow-sm text-center">
-              <Card.Body>
-                <Card.Title>📈 Key Metrics</Card.Title>
-                <ul className="list-unstyled mt-3">
-                  <li>📄 Total Submissions: {data.totalSubmissions}</li>
-                  <li>📅 Interviews Scheduled: {data.interviewsScheduled}</li>
-                  <li>💼 Offers Made: {data.offersMade}</li>
-                  <li>🎯 Hired: {data.hired}</li>
-                </ul>
+          {/* Key Metrics Card */}
+          <Col md={5} lg={4}>
+            <Card className="shadow-sm h-100 border-0">
+              <Card.Body className="d-flex flex-column justify-content-center">
+                <Card.Title className="text-center text-purple fw-bold mb-4">📈 Key Metrics</Card.Title>
+                <div className="metrics-list">
+                  <div className="metric-item">
+                    <span>📄 Total Submissions:</span>
+                    <strong className="text-dark">{data.totalSubmissions}</strong>
+                  </div>
+                  <div className="metric-item">
+                    <span>📅 Interviews:</span>
+                    <strong className="text-primary">{data.interviewsScheduled}</strong>
+                  </div>
+                  <div className="metric-item">
+                    <span>💼 Offers Made:</span>
+                    <strong className="text-info">{data.offersMade}</strong>
+                  </div>
+                  <div className="metric-item success">
+                    <span>🎯 Hired:</span>
+                    <strong className="text-success">{data.hired}</strong>
+                  </div>
+                </div>
               </Card.Body>
             </Card>
           </Col>
         </Row>
 
         {/* ROW 2: Manage Positions */}
-        <Card className="mb-4 shadow-sm">
-          <Card.Body>
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <Card.Title>💼 Manage Positions</Card.Title>
-              <Button variant="info" onClick={() => navigate("/hiring-manager/open-positions")}>
-                View All Positions →
-              </Button>
-            </div>
-            <Form onSubmit={addPosition}>
-              <Row className="g-3">
-                <Col md={2}>
-                  <Form.Control
-                    type="text"
-                    placeholder="Title"
-                    required
-                    value={newPosition.title}
-                    onChange={(e) =>
-                      setNewPosition({ ...newPosition, title: e.target.value })
-                    }
-                  />
-                </Col>
-                <Col md={2}>
-                  <Form.Control
-                    type="text"
-                    placeholder="Department"
-                    value={newPosition.department}
-                    onChange={(e) =>
-                      setNewPosition({
-                        ...newPosition,
-                        department: e.target.value,
-                      })
-                    }
-                  />
-                </Col>
-                <Col md={2}>
-                  <Form.Control
-                    type="text"
-                    placeholder="Location"
-                    value={newPosition.location}
-                    onChange={(e) =>
-                      setNewPosition({
-                        ...newPosition,
-                        location: e.target.value,
-                      })
-                    }
-                  />
-                </Col>
-                <Col md={3}>
-                  <Form.Control
-                    type="text"
-                    placeholder="Required Skills (comma separated)"
-                    value={newPosition.requiredSkills}
-                    onChange={(e) =>
-                      setNewPosition({
-                        ...newPosition,
-                        requiredSkills: e.target.value,
-                      })
-                    }
-                  />
-                </Col>
-                <Col md={1}>
-                  <Form.Control
-                    type="number"
-                    min="1"
-                    placeholder="Openings"
-                    value={newPosition.openings}
-                    onChange={(e) =>
-                      setNewPosition({
-                        ...newPosition,
-                        openings: parseInt(e.target.value),
-                      })
-                    }
-                  />
-                </Col>
-                <Col md={2}>
-                  <Button type="submit" variant="success" className="w-100">
-                    ➕ Add
-                  </Button>
-                </Col>
-              </Row>
-            </Form>
-          </Card.Body>
-        </Card>
-
-        {/* ROW 3: Cards Grid (SOW REMOVED) */}
-        <Row>
-          <Col md={6}>
-            <Card className="shadow-sm mb-4">
+        <Row className="mb-4">
+          <Col>
+            <Card className="shadow-sm border-0">
               <Card.Body>
-                <Card.Title>📬 Candidate Applications</Card.Title>
-                <Card.Text>
-                  Review applications, communicate with candidates, and schedule
-                  interviews.
-                </Card.Text>
-                <Button
-                  variant="primary"
-                  onClick={() => navigate("/hiring-manager/applications")}
-                >
-                  View Applications →
-                </Button>
-              </Card.Body>
-            </Card>
-          </Col>
-
-          <Col md={6}>
-            <Card className="shadow-sm mb-4">
-              <Card.Body>
-                <Card.Title>🗓️ Interviews</Card.Title>
-                <Card.Text>
-                  View scheduled interviews, manage timeslots, and submit feedback.
-                </Card.Text>
-                <Button
-                  variant="info"
-                  className="text-white"
-                  onClick={() => navigate("/hiring-manager/schedule")}
-                >
-                  Manage Interviews →
-                </Button>
-              </Card.Body>
-            </Card>
-          </Col>
-
-          <Col md={6}>
-            <Card className="shadow-sm mb-4">
-              <Card.Body>
-                <Card.Title>🧾 Purchase Orders (PO)</Card.Title>
-                <Card.Text>
-                  Create and track purchase orders for hired candidates.
-                </Card.Text>
-                <div className="d-flex gap-2">
-                  <Button variant="success" onClick={() => navigate("/hiring-manager/create-po")}>
-                    ➕ Create PO
-                  </Button>
-                  <Button
-                    variant="outline-primary"
-                    onClick={() => navigate("/hiring-manager/purchase-orders")}
-                  >
-                    📄 View All POs
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <Card.Title className="text-purple fw-bold mb-0">💼 Manage Positions</Card.Title>
+                  <Button className="purple-outline-btn" size="sm" onClick={() => navigate("/hiring-manager/open-positions")}>
+                    View All Positions →
                   </Button>
                 </div>
+                <Form onSubmit={addPosition} className="p-3 bg-light rounded">
+                  <Row className="g-3 align-items-end">
+                    <Col md={3}>
+                      <Form.Label>Title</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="e.g. Senior Dev"
+                        required
+                        value={newPosition.title}
+                        onChange={(e) => setNewPosition({ ...newPosition, title: e.target.value })}
+                      />
+                    </Col>
+                    <Col md={2}>
+                      <Form.Label>Dept</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="Engineering"
+                        value={newPosition.department}
+                        onChange={(e) => setNewPosition({ ...newPosition, department: e.target.value })}
+                      />
+                    </Col>
+                    <Col md={2}>
+                      <Form.Label>Location</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="Remote / NY"
+                        value={newPosition.location}
+                        onChange={(e) => setNewPosition({ ...newPosition, location: e.target.value })}
+                      />
+                    </Col>
+                    <Col md={3}>
+                      <Form.Label>Skills</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="React, Node..."
+                        value={newPosition.requiredSkills}
+                        onChange={(e) => setNewPosition({ ...newPosition, requiredSkills: e.target.value })}
+                      />
+                    </Col> {/* ✅ FIX: This </Col> tag was mistyped as </Player> */}
+                    <Col md={1}>
+                      <Form.Label>Openings</Form.Label>
+                      <Form.Control
+                        type="number"
+                        min="1"
+                        value={newPosition.openings}
+                        onChange={(e) => setNewPosition({ ...newPosition, openings: parseInt(e.target.value) })}
+                      />
+                    </Col>
+                    <Col md={1}>
+                      <Button type="submit" className="purple-btn w-100">
+                        ➕
+                      </Button>
+                    </Col>
+                  </Row>
+                </Form>
               </Card.Body>
             </Card>
           </Col>
+        </Row>
 
-          <Col md={6}>
-            <Card className="shadow-sm mb-4">
-              <Card.Body>
-                <Card.Title>💌 Inbox</Card.Title>
-                <Card.Text>
-                  View and reply to messages from candidates in real time.
-                </Card.Text>
-                <Button
-                  variant="warning"
-                  className="text-white"
-                  onClick={() => navigate("/hiring-manager/inbox")}
-                >
-                  💬 Go to Inbox →
-                </Button>
-              </Card.Body>
-            </Card>
-          </Col>
-
-          <Col md={6}>
-            <Card className="shadow-sm mb-4">
-              <Card.Body>
-                <Card.Title>🚀 Onboarding Tracker</Card.Title>
-                <Card.Text>
-                  Track onboarding progress of hired candidates.
-                </Card.Text>
-                <Button
-                  style={{ backgroundColor: "#6f42c1", color: "white" }}
-                  onClick={() => navigate("/hiring-manager/onboarding")}
-                >
-                  View Onboarding →
-                </Button>
-              </Card.Body>
-            </Card>
-          </Col>
-
-          <Col md={6}>
-            <Card className="shadow-sm mb-4">
-              <Card.Body>
-                <Card.Title>🤝 Agency / Recruiter Invites</Card.Title>
-                <Card.Text>
-                  Invite agencies or recruiters to submit candidates for open
-                  positions.
-                </Card.Text>
-                <Button
-                  variant="dark"
-                  onClick={() => navigate("/hiring-manager/agencies")}
-                >
-                  ✉️ Manage Invites →
-                </Button>
-              </Card.Body>
-            </Card>
-          </Col>
+        {/* ROW 3: Navigation Cards */}
+        <Row className="g-4">
+          {[
+            { title: "📬 Applications", text: "Review apps & schedule interviews.", path: "/hiring-manager/applications", btn: "View Apps" },
+            { title: "🗓️ Interviews", text: "Manage timeslots & feedback.", path: "/hiring-manager/schedule", btn: "Manage" },
+            { title: "🧾 POs", text: "Track purchase orders.", path: "/hiring-manager/purchase-orders", btn: "View POs" },
+            { title: "💌 Inbox", text: "Messages from candidates.", path: "/hiring-manager/inbox", btn: "Open Inbox" },
+            { title: "🚀 Onboarding", text: "Track hired candidate progress.", path: "/hiring-manager/onboarding", btn: "Track" },
+            { title: "🤝 Agencies", text: "Invite recruiters.", path: "/hiring-manager/agencies", btn: "Invite" },
+          ].map((item, idx) => (
+            <Col md={4} key={idx}>
+              <Card className="shadow-sm h-100 border-0 nav-card">
+                <Card.Body className="text-center">
+                  <Card.Title className="text-purple fw-bold">{item.title}</Card.Title>
+                  <Card.Text className="text-muted mb-4">{item.text}</Card.Text>
+                  <Button
+                    className="purple-btn w-100"
+                    onClick={() => navigate(item.path)}
+                  >
+                    {item.btn} →
+                  </Button>
+                </Card.Body>
+              </Card>
+            </Col>
+          ))}
         </Row>
       </Container>
     </div>

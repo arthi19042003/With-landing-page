@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const User = require("../models/User"); // ✅ Import the User model
 
 const protect = async (req, res, next) => {
   let token;
@@ -14,13 +15,15 @@ const protect = async (req, res, next) => {
       // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      // ✅ FIX: Set req.user directly from the token payload
-      req.user = decoded; 
-      
-      // ✅ CRITICAL FIX: Handle both 'id' and 'userId' formats
-      // This ensures req.userId is ALWAYS defined for your routes
-      req.userId = decoded.id || decoded.userId;
+      // ✅ THE REAL FIX: Fetch the user from DB and attach to req
+      const userId = decoded.id || decoded.userId;
+      req.user = await User.findById(userId).select("-password"); // Attach full user object (minus password)
+      req.userId = userId; // Keep this for routes that only need the ID
 
+      if (!req.user) {
+        return res.status(401).json({ message: "Not authorized, user not found" });
+      }
+      
       next();
     } catch (error) {
       console.error("Auth Error:", error.message);

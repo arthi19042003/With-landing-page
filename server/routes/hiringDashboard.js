@@ -1,16 +1,12 @@
 const express = require("express");
 const router = express.Router();
-// ✅ FIX: Import 'Submission' model (where candidates are actually saved)
+// ✅ Import 'Submission' model
 const Submission = require("../models/Submission");
-// Fallback: If you use 'Application' model instead, uncomment next line
-// const Submission = require("../models/Application"); 
-
 const Position = require("../models/Position");
 const protect = require("../middleware/auth");
 
 router.get("/summary", protect, async (req, res) => {
   try {
-    // ✅ Use req.userId from the fixed auth middleware
     const userId = req.userId; 
 
     // 1. Find all Jobs (Positions) created by this Hiring Manager
@@ -18,7 +14,6 @@ router.get("/summary", protect, async (req, res) => {
     const myJobIds = myJobs.map(job => job._id);
 
     // 2. Build Query to find Submissions for these jobs
-    // We check multiple field names to be safe (position, positionId, job)
     const query = {
       $or: [
         { position: { $in: myJobIds } }, 
@@ -29,18 +24,24 @@ router.get("/summary", protect, async (req, res) => {
     };
 
     // 3. Run counts on the Submission model
-    // Using regex for status to match "Interview Scheduled", "Phone Screen", etc.
+    // ✅ FIX: Using regex with case-insensitive 'i' to match model statuses
     const [totalSubmissions, interviewsScheduled, offersMade, hired] = await Promise.all([
       Submission.countDocuments(query),
-      Submission.countDocuments({ ...query, status: { $regex: "Interview", $options: "i" } }),
-      Submission.countDocuments({ ...query, status: "Offer" }),
-      Submission.countDocuments({ ...query, status: "Hired" })
+      
+      // Matches "interviewed"
+      Submission.countDocuments({ ...query, status: { $regex: "interviewed", $options: "i" } }), 
+      
+      // Matches "reviewed" (as a proxy for "Offer" since "offer" isn't a status)
+      Submission.countDocuments({ ...query, status: { $regex: "reviewed", $options: "i" } }), 
+      
+      // Matches "hired"
+      Submission.countDocuments({ ...query, status: { $regex: "hired", $options: "i" } }) 
     ]);
 
     res.json({
       totalSubmissions,
-      interviewsScheduled,
-      offersMade,
+      interviewsScheduled, // This will now count "interviewed"
+      offersMade: offersMade, // This will now count "reviewed"
       hired
     });
   } catch (err) {
