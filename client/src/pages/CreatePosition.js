@@ -12,7 +12,8 @@ const CreatePosition = () => {
     organization: '',
     skills: '',
     description: '',
-    status: 'open',
+    // ✅ FIX: Changed 'open' to 'Open' (Capitalized) to match backend Schema
+    status: 'Open', 
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
@@ -31,7 +32,11 @@ const CreatePosition = () => {
     setMessage({ type: '', text: '' });
 
     try {
-      const skillsArray = formData.skills.split(',').map(s => s.trim()).filter(s => s);
+      // Ensure skills are sent as an array
+      const skillsArray = formData.skills 
+        ? formData.skills.split(',').map(s => s.trim()).filter(s => s) 
+        : [];
+        
       const postData = { ...formData, skills: skillsArray };
 
       await api.post('/positions', postData);
@@ -42,6 +47,7 @@ const CreatePosition = () => {
       }, 1500);
 
     } catch (error) {
+      console.error("Create Position Error:", error);
       setMessage({
         type: 'error',
         text: error.response?.data?.message || 'Failed to create position',

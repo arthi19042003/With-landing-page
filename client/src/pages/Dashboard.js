@@ -34,6 +34,15 @@ const Dashboard = () => {
                 <button className="purple-btn">Edit Profile</button>
               </Link>
             </div>
+            
+            {/* ✅ NEW CARD: Find Jobs */}
+            <div className="dashboard-card">
+              <h3>Find Jobs</h3>
+              <p>Browse open positions and apply instantly</p>
+              <Link to="/candidate/jobs">
+                <button className="purple-btn">Search Jobs</button>
+              </Link>
+            </div>
 
             <div className="dashboard-card">
               <h3>Resume</h3>

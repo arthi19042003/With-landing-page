@@ -40,6 +40,7 @@ export default function Navbar() {
               {role === 'candidate' && (
                 <>
                   <Link to="/dashboard" className="navbar-link">Dashboard</Link>
+                  <Link to="/candidate/jobs" className="navbar-link">Jobs</Link> {/* ✅ ADDED LINK */}
                   <Link to="/profile" className="navbar-link">Profile</Link>
                   <Link to="/resume" className="navbar-link">Resume</Link>
                   <Link to="/interviews" className="navbar-link">Interviews</Link>

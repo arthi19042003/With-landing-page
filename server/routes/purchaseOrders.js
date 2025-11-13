@@ -6,7 +6,8 @@ const protect = require("../middleware/auth");
 // ✅ GET All POs
 router.get("/", protect, async (req, res) => {
   try {
-    const orders = await PurchaseOrder.find({ createdBy: req.user.id }).sort({ createdAt: -1 });
+    // FIX: Changed req.user.id to req.userId
+    const orders = await PurchaseOrder.find({ createdBy: req.userId }).sort({ createdAt: -1 });
     res.json(orders);
   } catch (err) {
     console.error("Error fetching POs:", err);
@@ -34,18 +35,20 @@ router.post("/", protect, async (req, res) => {
       rate,
       startDate,
       status: "Pending",
-      createdBy: req.user.id,
+      // FIX: Changed req.user.id to req.userId to match auth middleware
+      createdBy: req.userId, 
     });
 
     await newOrder.save();
     res.status(201).json(newOrder);
   } catch (err) {
     console.error("Error creating PO:", err);
-    res.status(500).json({ message: "Server Error creating PO" });
+    // ✅ FIXED TYPO HERE: Removed 'QH'
+    res.status(500).json({ message: "Server Error creating PO: " + err.message });
   }
 });
 
-// ✅ PUT Update Status (This was missing!)
+// ✅ PUT Update Status
 router.put("/:id", protect, async (req, res) => {
   try {
     const { status } = req.body;
@@ -70,9 +73,10 @@ router.put("/:id", protect, async (req, res) => {
 // ✅ DELETE PO
 router.delete("/:id", protect, async (req, res) => {
   try {
+    // FIX: Changed req.user.id to req.userId
     const deleted = await PurchaseOrder.findOneAndDelete({
       _id: req.params.id,
-      createdBy: req.user.id,
+      createdBy: req.userId,
     });
 
     if (!deleted) {

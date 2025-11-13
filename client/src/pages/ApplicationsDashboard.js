@@ -9,100 +9,90 @@ import {
   Table,
   Badge,
 } from "react-bootstrap";
-// ✅ Import the auth hook
-import { useAuth } from "../context/AuthContext";
+import api from "../api/axios";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function ApplicationsDashboard() {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedApp, setSelectedApp] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+  
+  // Modals state
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  
   const [interviewDate, setInterviewDate] = useState("");
-  const [message, setMessage] = useState("");
   const [history, setHistory] = useState([]);
   
-  // ✅ Get token from context
-  const { token } = useAuth();
+  const token = localStorage.getItem("token"); 
 
   const fetchApplications = async () => {
-    if (!token) return; // Don't fetch if token isn't ready
+    if (!token) {
+      setLoading(false);
+      return; 
+    }
     try {
       setLoading(true);
-      const res = await fetch("/api/applications", {
-        // ✅ Use context token
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setApplications(data);
+      const res = await api.get("/applications");
+      setApplications(res.data);
     } catch (err) {
       console.error("Error fetching applications:", err);
+      toast.error("Failed to load applications.");
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ Add token as dependency
   useEffect(() => {
     fetchApplications();
     // eslint-disable-next-line
   }, [token]);
 
+  // ✅ Generic Status Update Function (Used for Review, Hire, Reject)
   const updateStatus = async (id, action, payload = {}) => {
     if (!token) return;
     try {
-      const res = await fetch(`/api/applications/${id}/${action}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          // ✅ Use context token
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-      if (res.ok) fetchApplications();
+      const res = await api.put(`/applications/${id}/${action}`, payload);
+      if (res.status === 200) {
+        toast.success(`Application ${action} successful`);
+        fetchApplications(); // Refresh list to show new status
+      }
     } catch (err) {
       console.error(`Error performing ${action}:`, err);
+      toast.error(`Failed to ${action} application`);
     }
   };
 
-  const fetchHistory = async (email) => {
+  // ✅ Fetch History & Show Modal
+  const handleViewHistory = async (email) => {
     if (!token) return;
     try {
-      const res = await fetch(`/api/applications/history/${email}`, {
-        // ✅ Use context token
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setHistory(data);
+      const res = await api.get(`/applications/history/${email}`);
+      setHistory(res.data);
+      setShowHistoryModal(true); // Open modal after data is loaded
     } catch (err) {
       console.error("Error fetching history:", err);
+      toast.error("Failed to load history.");
     }
   };
 
-  const handleSchedule = (id) => {
-    if (!interviewDate) return alert("Select a date first!");
-    updateStatus(id, "schedule", { interviewDate });
+  const handleSchedule = async () => {
+    if (!interviewDate) return toast.error("Select a date first!");
+    if (!selectedApp) return;
+
+    await updateStatus(selectedApp._id, "schedule", { interviewDate });
     setInterviewDate("");
+    setShowScheduleModal(false);
   };
 
-  const sendMessage = async (id) => {
-    if (!message.trim()) return;
-    if (!token) return;
-    try {
-      await fetch(`/api/applications/${id}/message`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          // ✅ Use context token
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ message, from: "hiringManager" }),
-      });
-      setMessage("");
-      fetchApplications();
-    } catch (err) {
-      console.error("Error sending message:", err);
+  const handleViewResume = (resumePath) => {
+    if (!resumePath) {
+        toast.error("No resume file available.");
+        return;
     }
+    const normalizedPath = resumePath.replace(/\\/g, "/");
+    const fileUrl = `http://localhost:5000/${normalizedPath}`;
+    window.open(fileUrl, "_blank");
   };
 
   if (loading)
@@ -113,7 +103,8 @@ export default function ApplicationsDashboard() {
     );
 
   return (
-    <div className="container mt-4">
+    <div className="container mt-4" style={{ paddingTop: "80px" }}>
+      <Toaster position="top-right" />
       <h2 className="mb-4">📬 Candidate Applications</h2>
 
       {applications.length === 0 ? (
@@ -146,6 +137,8 @@ export default function ApplicationsDashboard() {
                         ? "danger"
                         : app.status === "Interview"
                         ? "info"
+                        : app.status === "Under Review" 
+                        ? "warning"
                         : "secondary"
                     }
                   >
@@ -162,42 +155,58 @@ export default function ApplicationsDashboard() {
                     <Button
                       size="sm"
                       variant="outline-primary"
-                      onClick={() => window.open(app.resumeUrl, "_blank")}
+                      onClick={() => handleViewResume(app.resumeUrl)}
                     >
                       📄 Resume
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="outline-success"
-                      onClick={() => updateStatus(app._id, "review")}
-                    >
-                      Review
-                    </Button>
+                    
+                    {/* ✅ REVIEW BUTTON */}
+                    {app.status === "Applied" && (
+                      <Button
+                        size="sm"
+                        variant="outline-primary"
+                        onClick={() => updateStatus(app._id, "review")}
+                      >
+                        Review
+                      </Button>
+                    )}
+
                     <Button
                       size="sm"
                       variant="outline-warning"
                       onClick={() => {
                         setSelectedApp(app);
-                        setShowModal(true);
+                        setShowScheduleModal(true);
                       }}
                     >
                       Schedule
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="outline-danger"
-                      onClick={() => updateStatus(app._id, "reject")}
-                    >
-                      Reject
-                    </Button>
+                    
+                    {/* Reject Button */}
+                    {app.status !== "Rejected" && app.status !== "Hired" && (
+                       <Button
+                        size="sm"
+                        variant="outline-danger"
+                        onClick={() => {
+                          if (window.confirm("Are you sure you want to reject this candidate?")) {
+                            updateStatus(app._id, "reject");
+                          }
+                        }}
+                      >
+                        Reject
+                      </Button>
+                    )}
+                   
+                    {/* ✅ HISTORY BUTTON */}
                     <Button
                       size="sm"
                       variant="outline-info"
-                      onClick={() => fetchHistory(app.email)}
+                      onClick={() => handleViewHistory(app.email)}
                     >
                       History
                     </Button>
-                    {/* Message button is for the inbox, we'll leave it for now */}
+                    
+                    {/* Hire Button */}
                     {app.status === "Hired" ? (
                       <Button
                         size="sm"
@@ -210,7 +219,11 @@ export default function ApplicationsDashboard() {
                       <Button
                         size="sm"
                         variant="success"
-                        onClick={() => updateStatus(app._id, "hire")}
+                        onClick={() => {
+                           if (window.confirm("Are you sure you want to hire this candidate?")) {
+                            updateStatus(app._id, "hire");
+                           }
+                        }}
                       >
                         Hire
                       </Button>
@@ -224,7 +237,7 @@ export default function ApplicationsDashboard() {
       )}
 
       {/* Interview Scheduler Modal */}
-      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+      <Modal show={showScheduleModal} onHide={() => setShowScheduleModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>🗓️ Schedule Interview</Modal.Title>
         </Modal.Header>
@@ -239,57 +252,58 @@ export default function ApplicationsDashboard() {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
+          <Button variant="secondary" onClick={() => setShowScheduleModal(false)}>
             Cancel
           </Button>
-          <Button
-            variant="primary"
-            onClick={() => {
-              handleSchedule(selectedApp._id);
-              setShowModal(false);
-            }}
-          >
+          <Button variant="primary" onClick={handleSchedule}>
             Confirm
           </Button>
         </Modal.Footer>
       </Modal>
 
-      {/* Candidate History Modal */}
+      {/* ✅ Candidate History Modal (Fixed) */}
       <Modal
-        show={history.length > 0}
-        onHide={() => setHistory([])}
+        show={showHistoryModal}
+        onHide={() => setShowHistoryModal(false)}
         centered
         size="lg"
       >
         <Modal.Header closeButton>
-          <Modal.Title>🗂️ Candidate History</Modal.Title>
+          <Modal.Title>🗂️ Candidate Application History</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>Position</th>
-                <th>Status</th>
-                <th>Interview Date</th>
-                <th>Applied</th>
-              </tr>
-            </thead>
-            <tbody>
-              {history.map((h, i) => (
-                <tr key={i}>
-                  <td>{h.position}</td>
-                  <td>{h.status}</td>
-                  <td>
-                    {h.interviewDate
-                      ? new Date(h.interviewDate).toLocaleDateString()
-                      : "-"}
-                  </td>
-                  <td>{new Date(h.appliedAt).toLocaleDateString()}</td>
+          {history.length === 0 ? (
+            <p className="text-center text-muted">No history found.</p>
+          ) : (
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <th>Position</th>
+                  <th>Status</th>
+                  <th>Applied Date</th>
+                  <th>Interview Date</th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
+              </thead>
+              <tbody>
+                {history.map((h, i) => (
+                  <tr key={i}>
+                    <td>{h.position}</td>
+                    <td>{h.status}</td>
+                    <td>{new Date(h.appliedAt).toLocaleDateString()}</td>
+                    <td>
+                      {h.interviewDate
+                        ? new Date(h.interviewDate).toLocaleDateString()
+                        : "-"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          )}
         </Modal.Body>
+        <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowHistoryModal(false)}>Close</Button>
+        </Modal.Footer>
       </Modal>
     </div>
   );

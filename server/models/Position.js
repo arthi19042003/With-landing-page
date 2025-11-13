@@ -1,12 +1,11 @@
-// Corrected: server/models/Position.js
-// This is a simple model definition without the extra database connection logic.
-
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const PositionSchema = new Schema({
   title: { type: String, required: true },
   department: String,
+  project: String, // ✅ ADDED: To store Project field
+  organization: String, // ✅ ADDED: To store Organization field
   description: String,
   requiredSkills: [String],
   location: String,
@@ -16,5 +15,4 @@ const PositionSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-// Use mongoose.model, not a custom connection model
 module.exports = mongoose.model('Position', PositionSchema);

@@ -25,6 +25,7 @@ import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import ResumeUpload from "./pages/ResumeUpload";
 import CandidateInterviewList from "./pages/Interviews"; 
+import CandidateJobs from "./pages/CandidateJobs"; // ✅ IMPORT NEW PAGE
 
 // ==================== Employer Pages ====================
 import EmployerDashboard from "./pages/Dashboard"; 
@@ -116,6 +117,15 @@ function App() {
               element={
                 <PrivateRoute>
                   <ResumeUpload />
+                </PrivateRoute>
+              }
+            />
+            {/* ✅ ADD NEW ROUTE */}
+            <Route
+              path="/candidate/jobs"
+              element={
+                <PrivateRoute>
+                  <CandidateJobs />
                 </PrivateRoute>
               }
             />

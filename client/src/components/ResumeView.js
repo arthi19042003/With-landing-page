@@ -1,3 +1,4 @@
+// client/src/components/ResumeView.js
 import React, { useState } from 'react';
 
 export default function ResumeView({ resume, onAction }) {
@@ -9,6 +10,15 @@ export default function ResumeView({ resume, onAction }) {
 
   const handleAction = (action) => {
     if (!onAction) return; // If no action handler provided, do nothing
+
+    // ✅ ADDED: Confirmation dialogs for Hire and Reject actions
+    if (action === 'hire') {
+      if (!window.confirm(`Are you sure you want to HIRE ${resume.name}?`)) return;
+    }
+    if (action === 'reject') {
+      if (!window.confirm(`Are you sure you want to REJECT ${resume.name}?`)) return;
+    }
+
     const payload = { note };
 
     if (action === 'schedule') {
@@ -79,30 +89,42 @@ export default function ResumeView({ resume, onAction }) {
 
           {/* Action Buttons */}
           <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            <button
-              onClick={() => handleAction('shortlist')}
-              style={btnStyle('#22c55e')}
-            >
-              Shortlist
-            </button>
-            <button
-              onClick={() => handleAction('reject')}
-              style={btnStyle('#ef4444')}
-            >
-              Reject
-            </button>
+            {/* ✅ Shortlist: Hide if already Shortlisted, Hired, or Rejected */}
+            {resume.status !== 'Shortlisted' && resume.status !== 'Hired' && resume.status !== 'Rejected' && (
+              <button
+                onClick={() => handleAction('shortlist')}
+                style={btnStyle('#22c55e')}
+              >
+                Shortlist
+              </button>
+            )}
+
+            {/* ✅ Reject: Hide if already Rejected or Hired */}
+            {resume.status !== 'Rejected' && resume.status !== 'Hired' && (
+              <button
+                onClick={() => handleAction('reject')}
+                style={btnStyle('#ef4444')}
+              >
+                Reject
+              </button>
+            )}
+
             <button
               onClick={() => handleAction('schedule')}
               style={btnStyle('#3b82f6')}
             >
               Schedule Interview
             </button>
-            <button
-              onClick={() => handleAction('hire')}
-              style={btnStyle('#9333ea')}
-            >
-              Hire
-            </button>
+
+            {/* ✅ Hire: Hide if already Hired or Rejected */}
+            {resume.status !== 'Hired' && resume.status !== 'Rejected' && (
+              <button
+                onClick={() => handleAction('hire')}
+                style={btnStyle('#9333ea')}
+              >
+                Hire
+              </button>
+            )}
           </div>
         </>
       )}

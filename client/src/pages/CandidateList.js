@@ -11,7 +11,6 @@ const CandidateList = () => {
   const [filter, setFilter] = useState("");
 
   const fetchCandidates = async () => {
-    // ... (existing code)
     setLoading(true);
     setError("");
     try {
@@ -30,7 +29,6 @@ const CandidateList = () => {
   }, []);
 
   const handleStatusChange = async (id, newStatus) => {
-    // ... (existing code)
     try {
       const response = await api.put(`/candidates/${id}/status`, { status: newStatus });
       setCandidates(prev => 
@@ -42,7 +40,7 @@ const CandidateList = () => {
     }
   };
 
-  // ✅ NEW: Handle Resume Download
+  // ✅ Handle Resume Download
   const handleResumeDownload = async (candidateId, fileName) => {
     try {
       const response = await api.get(`/candidates/resume/${candidateId}`, {
@@ -63,7 +61,6 @@ const CandidateList = () => {
   };
 
   const filteredCandidates = candidates.filter(c => {
-    // ... (existing code)
     const fullName = `${c.firstName || ''} ${c.lastName || ''}`.toLowerCase();
     const email = (c.email || '').toLowerCase();
     const position = (c.position || '').toLowerCase();
@@ -71,7 +68,6 @@ const CandidateList = () => {
     return fullName.includes(search) || email.includes(search) || position.includes(search);
   });
 
-  // ... (loading/error renders)
   if (loading) {
     return <div className="candidates-container"><p className="empty">Loading candidates...</p></div>;
   }
@@ -129,7 +125,7 @@ const CandidateList = () => {
                     </span>
                   </td>
                   <td className="actions">
-                    {/* ✅ NEW: View Resume Button */}
+                    {/* View Resume Button */}
                     {c.resumePath && (
                       <button 
                         className="btn view"
@@ -138,7 +134,9 @@ const CandidateList = () => {
                         Resume
                       </button>
                     )}
-                    {c.status !== "Shortlisted" && (
+
+                    {/* Shortlist Button (Hide if Hired/Rejected/Shortlisted) */}
+                    {c.status !== "Shortlisted" && c.status !== "Hired" && c.status !== "Rejected" && (
                       <button 
                         className="btn shortlist"
                         onClick={() => handleStatusChange(c._id, "Shortlisted")}
@@ -146,10 +144,31 @@ const CandidateList = () => {
                         Shortlist
                       </button>
                     )}
-                    {c.status !== "Rejected" && (
+
+                    {/* ✅ Hire Button (New Ability) */}
+                    {c.status !== "Hired" && c.status !== "Rejected" && (
+                      <button 
+                        className="btn"
+                        style={{ backgroundColor: "#16a34a", color: "#fff" }} // Green style
+                        onClick={() => {
+                          if (window.confirm(`Are you sure you want to HIRE ${c.firstName} ${c.lastName}?`)) {
+                            handleStatusChange(c._id, "Hired");
+                          }
+                        }}
+                      >
+                        Hire
+                      </button>
+                    )}
+
+                    {/* Reject Button (With Confirmation) */}
+                    {c.status !== "Rejected" && c.status !== "Hired" && (
                       <button 
                         className="btn reject"
-                        onClick={() => handleStatusChange(c._id, "Rejected")}
+                        onClick={() => {
+                          if (window.confirm(`Are you sure you want to REJECT ${c.firstName} ${c.lastName}?`)) {
+                            handleStatusChange(c._id, "Rejected");
+                          }
+                        }}
                       >
                         Reject
                       </button>
