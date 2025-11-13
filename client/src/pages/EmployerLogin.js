@@ -62,7 +62,8 @@ export default function EmployerLogin() {
           </div>
         )}
 
-        <form onSubmit={handleLogin}>
+        {/* --- THIS IS THE FIX --- */}
+        <form onSubmit={handleLogin} noValidate>
           <div className="form-group">
             <label>Email<span className="mandatory">*</span></label>
             <input 

@@ -40,6 +40,7 @@ export default function EmployerProfile() {
   const [editingIndex, setEditingIndex] = useState(null);
 
   const [message, setMessage] = useState({ type: "", text: "" });
+  const [errors, setErrors] = useState({}); // ✅ ADDED: State for field errors
 
   useEffect(() => {
     // load employer profile if user exists
@@ -85,10 +86,13 @@ export default function EmployerProfile() {
   }, [user]);
 
   // helpers -----------------------------------------------------------------
+  
+  // ✅ MODIFIED: Clears field-specific error on change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm(f => ({ ...f, [name]: value }));
-    if (message.text) setMessage({ type: "", text: "" });
+    if (message.type === "error") setMessage({ type: "", text: "" }); // Clear general error
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: null })); // Clear field error
   };
 
   // Sponsors ----------------------------------------------------------------
@@ -226,18 +230,35 @@ export default function EmployerProfile() {
   };
 
   // Save -------------------------------------------------------------------
+  
+  // ✅ MODIFIED: This function now sets the 'errors' state
   const validateBeforeSave = () => {
-    const required = ["companyName", "hiringManagerFirstName", "hiringManagerLastName", "hiringManagerPhone"];
+    const newErrors = {};
+    const required = [
+      "companyName", "hiringManagerFirstName", "hiringManagerLastName", "hiringManagerPhone",
+      "companyWebsite", "companyPhone", "companyAddress", "companyLocation",
+      "organization", "department"
+    ];
+    
+    let hasError = false;
     for (const k of required) {
       if (!form[k] || !String(form[k]).trim()) {
-        setMessage({ type: "error", text: "Please fill all required fields (marked *)" });
-        return false;
+        newErrors[k] = "This field is required";
+        hasError = true;
       }
     }
-    return true;
+    
+    setErrors(newErrors);
+    
+    if (hasError) {
+       setMessage({ type: "error", text: "Please fill all required fields (marked *)" });
+    }
+    
+    return !hasError; // Return true if valid, false if errors
   };
 
   const saveProfile = async () => {
+    setMessage({ type: "", text: "" }); // Clear previous messages
     if (!validateBeforeSave()) return;
     setSaving(true);
     
@@ -276,23 +297,23 @@ export default function EmployerProfile() {
 
           <div className="row">
             <label className="lbl">Company Name <span className="req">*</span></label>
-            <input name="companyName" value={form.companyName} onChange={handleChange} placeholder="Company Name" />
+            <input name="companyName" value={form.companyName} onChange={handleChange} placeholder="Company Name" className={errors.companyName ? "error" : ""} />
           </div>
 
           <div className="two-cols">
             <div>
               <label className="lbl">Hiring Manager First Name <span className="req">*</span></label>
-              <input name="hiringManagerFirstName" value={form.hiringManagerFirstName} onChange={handleChange} placeholder="First Name" />
+              <input name="hiringManagerFirstName" value={form.hiringManagerFirstName} onChange={handleChange} placeholder="First Name" className={errors.hiringManagerFirstName ? "error" : ""} />
             </div>
             <div>
               <label className="lbl">Hiring Manager Last Name <span className="req">*</span></label>
-              <input name="hiringManagerLastName" value={form.hiringManagerLastName} onChange={handleChange} placeholder="Last Name" />
+              <input name="hiringManagerLastName" value={form.hiringManagerLastName} onChange={handleChange} placeholder="Last Name" className={errors.hiringManagerLastName ? "error" : ""} />
             </div>
           </div>
 
           <div className="row">
             <label className="lbl">Hiring Manager Phone <span className="req">*</span></label>
-            <input name="hiringManagerPhone" value={form.hiringManagerPhone} onChange={handleChange} placeholder="Phone" />
+            <input name="hiringManagerPhone" value={form.hiringManagerPhone} onChange={handleChange} placeholder="Phone" className={errors.hiringManagerPhone ? "error" : ""} />
           </div>
 
           <div className="row">
@@ -313,22 +334,22 @@ export default function EmployerProfile() {
           <div className="two-cols">
             <div>
               <label className="lbl">Company Website <span className="req">*</span></label>
-              <input name="companyWebsite" value={form.companyWebsite} onChange={handleChange} placeholder="https://www.company.com" />
+              <input name="companyWebsite" value={form.companyWebsite} onChange={handleChange} placeholder="https://www.company.com" className={errors.companyWebsite ? "error" : ""} />
             </div>
             <div>
               <label className="lbl">Company Phone <span className="req">*</span></label>
-              <input name="companyPhone" value={form.companyPhone} onChange={handleChange} placeholder="(123) 456-7890" />
+              <input name="companyPhone" value={form.companyPhone} onChange={handleChange} placeholder="(123) 456-7890" className={errors.companyPhone ? "error" : ""} />
             </div>
           </div>
 
           <div className="two-cols">
             <div>
               <label className="lbl">Company Address <span className="req">*</span></label>
-              <input name="companyAddress" value={form.companyAddress} onChange={handleChange} placeholder="Street address" />
+              <input name="companyAddress" value={form.companyAddress} onChange={handleChange} placeholder="Street address" className={errors.companyAddress ? "error" : ""} />
             </div>
             <div>
               <label className="lbl">Company Location <span className="req">*</span></label>
-              <input name="companyLocation" value={form.companyLocation} onChange={handleChange} placeholder="City, State, Country" />
+              <input name="companyLocation" value={form.companyLocation} onChange={handleChange} placeholder="City, State, Country" className={errors.companyLocation ? "error" : ""} />
             </div>
           </div>
         </section>
@@ -340,7 +361,7 @@ export default function EmployerProfile() {
           <div className="two-cols">
             <div>
               <label className="lbl">Organization <span className="req">*</span></label>
-              <input name="organization" value={form.organization} onChange={handleChange} placeholder="Organization name" />
+              <input name="organization" value={form.organization} onChange={handleChange} placeholder="Organization name" className={errors.organization ? "error" : ""} />
             </div>
             <div>
               <label className="lbl">Cost Center</label>
@@ -350,7 +371,7 @@ export default function EmployerProfile() {
 
           <div className="row">
             <label className="lbl">Department <span className="req">*</span></label>
-            <input name="department" value={form.department} onChange={handleChange} placeholder="Department name" />
+            <input name="department" value={form.department} onChange={handleChange} placeholder="Department name" className={errors.department ? "error" : ""} />
           </div>
 
           <div className="row">

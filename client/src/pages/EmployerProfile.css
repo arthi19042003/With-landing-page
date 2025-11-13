@@ -50,6 +50,12 @@
   font-weight: 600;
   backdrop-filter: blur(6px);
   text-align: center; 
+  
+  /* ✅ ADDED: Set width and margin to match button */
+  width: 85%;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box; /* Ensure padding is included */
 }
 .emp-alert.error {
   background: rgba(255, 204, 214, 0.6);
@@ -144,6 +150,23 @@
   cursor: not-allowed;
 }
 
+/* === ✅ ADDED: Red Indicator for Validation === */
+.emp-page input.error,
+.emp-page textarea.error,
+.emp-page select.error {
+  border-color: #dc2626 !important; /* Red border */
+  background-color: #fee2e2 !important; /* Light red background */
+}
+
+.emp-page input.error:focus,
+.emp-page textarea.error:focus,
+.emp-page select.error:focus {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 8px rgba(220, 38, 38, 0.3) !important;
+  outline: none;
+}
+/* === END: Red Indicator === */
+
 
 /* Radio Button Alignment */
 .emp-page .radio-row {
@@ -204,11 +227,16 @@
   background: #fee2e2;
 }
 
+/* --- THIS IS THE FIX --- */
+/* This rule sets the save button to 85% width and centers it */
 .emp-page .save-btn {
   background: linear-gradient(90deg, #4f46e5, #7c3aed);
   color: white;
   padding: 16px;
-  width: 100%;
+  width: 85%; /* ✅ CHANGED: Set width to 85% */
+  display: block; /* ✅ KEPT: Ensures it's a block element */
+  margin-left: auto;  /* ✅ ADDED: Centers the button */
+  margin-right: auto; /* ✅ ADDED: Centers the button */
   border: none;
   border-radius: 10px;
   font-size: 16px;
@@ -375,5 +403,11 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
+  }
+  
+  /* ✅ Make button and alert full-width on mobile */
+  .emp-page .save-btn,
+  .emp-alert {
+    width: 100%;
   }
 }

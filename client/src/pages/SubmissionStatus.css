@@ -1,7 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+/* @import for Poppins removed */
 
 .submission-status-page {
-  font-family: 'Poppins', sans-serif;
+  /* font-family removed */
   background-color: #f9fafc;
   min-height: 100vh;
   display: flex;

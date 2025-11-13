@@ -82,7 +82,8 @@ const EmployerRegister = () => {
       <div className="auth-card"> 
         <h2>Employer Signup</h2>
 
-        <form onSubmit={handleSubmit}>
+        {/* --- THIS IS THE FIX --- */}
+        <form onSubmit={handleSubmit} noValidate>
           <div className="form-group">
             <label>Company Name<span className="mandatory">*</span></label>
             <input type="text" name="companyName" value={formData.companyName} onChange={handleChange} required className={errors.companyName ? "error" : ""} />

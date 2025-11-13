@@ -58,12 +58,12 @@ export default function Navbar() {
                 <>
                   <Link to="/hiring-manager/dashboard" className="navbar-link">Dashboard</Link>
                   <Link to="/hiring-manager/open-positions" className="navbar-link">Positions</Link>
+                  <Link to="/hiring-manager/applications" className="navbar-link">Applications</Link>
+                  <Link to="/hiring-manager/purchase-orders" className="navbar-link">POs</Link>
                   <Link to="/hiring-manager/inbox" className="navbar-link">Inbox</Link>
-                  <Link to="/positions/new" className="navbar-link">Post Job</Link>
                 </>
               )}
               
-              {/* ✅ --- UPDATED RECRUITER LINKS --- ✅ */}
               {role === 'recruiter' && ( 
                 <>
                   <Link to="/recruiter/dashboard" className="navbar-link">Dashboard</Link>

@@ -1,3 +1,4 @@
+// server/server.js
 // ===============================================
 // Smart Submissions Server
 // ===============================================
@@ -46,7 +47,6 @@ app.use("/api/auth", require("./routes/auth"));
 // ===============================================
 app.use("/api/profile", require("./routes/profile"));
 app.use("/api/resume", require("./routes/resume"));
-// app.use("/api/interview", require("./routes/interviewRoutes")); // ❌ REMOVED This conflicting route
 
 // ===============================================
 // Employer Routes
@@ -54,25 +54,29 @@ app.use("/api/resume", require("./routes/resume"));
 app.use("/api/employer", require("./routes/employerRoutes"));
 
 // ===============================================
-// Hiring Manager Routes ✅ (Correct & Working)
+// Hiring Manager Routes (Integrated from New HR)
 // ===============================================
-app.use("/api/hiringManager", require("./routes/managerRoutes"));
+// These replace the old generic /api/hiringManager routes
+app.use("/api/hiring-dashboard", protect, require("./routes/hiringDashboard"));
+app.use("/api/positions", protect, require("./routes/positions"));
+app.use("/api/purchase-orders", protect, require("./routes/purchaseOrders"));
+app.use("/api/applications", protect, require("./routes/applications"));
+app.use("/api/onboarding", protect, require("./routes/onboarding"));
+app.use("/api/agencies", protect, require("./routes/agencies"));
+// Note: If you have specific legacy manager logic, check 'routes/managerRoutes' 
+// before deleting it, but the new files above should cover the features.
 
 // ===============================================
 // Recruiter Routes (Protected)
 // ===============================================
-app.use("/api/recruiter", protect, require("./routes/recruiter")); // ✅ NEW ROUTE
+app.use("/api/recruiter", protect, require("./routes/recruiter"));
 
 // ===============================================
-// Protected Routes (Require Authentication)
+// Shared / Other Protected Routes
 // ===============================================
 app.use("/api/inbox", protect, require("./routes/inbox"));
-app.use("/api/positions", protect, require("./routes/positions"));
 app.use("/api/candidates", protect, require("./routes/candidates"));
-// ✅ FIXED: Pointed /api/interviews to the correct file
 app.use("/api/interviews", protect, require("./routes/interviewRoutes"));
-app.use("/api/onboarding", protect, require("./routes/onboarding"));
-app.use("/api/po", protect, require("./routes/po"));
 app.use("/api/dashboard", protect, require("./routes/dashboard"));
 app.use("/api/submissions", protect, require("./routes/submissions"));
 

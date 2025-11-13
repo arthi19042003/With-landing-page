@@ -13,7 +13,7 @@ import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import EmployerLogin from "./pages/EmployerLogin";
 import HiringManagerLogin from "./pages/HiringManagerLogin";
-import RecruiterLogin from "./pages/RecruiterLogin"; // ✅ Kept this
+import RecruiterLogin from "./pages/RecruiterLogin";
 
 import Register from "./pages/Register";
 import EmployerRegister from "./pages/EmployerRegister";
@@ -31,7 +31,7 @@ import EmployerDashboard from "./pages/Dashboard";
 import EmployerProfile from "./pages/EmployerProfile";
 import CreatePosition from "./pages/CreatePosition"; 
 
-// ==================== Recruiter Pages (NEW) ====================
+// ==================== Recruiter Pages ====================
 import RecruiterDashboard from "./pages/RecruiterDashboard";
 import RecruiterProfile from "./pages/RecruiterProfile"; 
 import RecruiterProfileEdit from "./pages/RecruiterProfileEdit";
@@ -39,18 +39,22 @@ import RecruiterProfileView from "./pages/RecruiterProfileView";
 import ResumeUploadRecruiter from "./pages/ResumeUploadRecruiter"; 
 import SubmissionStatus from "./pages/SubmissionStatus";
 
-// ==================== Hiring Manager Pages ====================
-import HiringManagerDashboard from "./pages/HiringDashboard"; 
+// ==================== Hiring Manager Pages (NEW & UPDATED) ====================
+import HiringManagerDashboard from "./pages/HiringManagerDashboard"; 
 import Inbox from "./pages/Inbox";
-import OpenPositions from "./pages/Positions"; 
+import OpenPositions from "./pages/OpenPositions"; 
 import CandidateListPage from "./pages/CandidateList";
 import InterviewManagementPage from "./pages/InterviewDetails"; 
-import Onboarding from "./pages/Onboarding"; 
-import HiringReports from "./pages/PurchaseOrders"; 
-
-// ==================== New Pages ====================
-import CandidateHistory from "./pages/CandidateHistory";
+// New imports from Final HR integration
+import ApplicationsDashboard from "./pages/ApplicationsDashboard";
+import OnboardingDashboard from "./pages/OnboardingDashboard";
+import ViewPurchaseOrders from "./pages/ViewPurchaseOrders";
+import CreatePurchaseOrder from "./pages/CreatePurchaseOrder";
+import AgencyInvites from "./pages/AgencyInvites";
+import ResumeDetailPage from "./pages/ResumeDetailPage";
 import PositionDetails from "./pages/PositionDetails";
+import CandidateHistory from "./pages/CandidateHistory";
+
 
 // ==================== Role-Based Dashboard Redirect ====================
 function RoleBasedDashboard() {
@@ -150,7 +154,7 @@ function App() {
               }
             />
             
-            {/* ==================== Recruiter Routes (NEW) ==================== */}
+            {/* ==================== Recruiter Routes ==================== */}
             <Route
               path="/recruiter/dashboard"
               element={
@@ -200,7 +204,7 @@ function App() {
               }
             />
 
-            {/* ==================== Hiring Manager Routes ==================== */}
+            {/* ==================== Hiring Manager Routes (Updated) ==================== */}
             <Route
               path="/hiring-manager/dashboard"
               element={
@@ -233,7 +237,57 @@ function App() {
                 </PrivateRoute>
               }
             />
-            
+            {/* New Features */}
+            <Route
+              path="/hiring-manager/applications"
+              element={
+                <PrivateRoute>
+                  <ApplicationsDashboard />
+                </PrivateRoute>
+              }
+            />
+             <Route
+              path="/hiring-manager/onboarding"
+              element={
+                <PrivateRoute>
+                  <OnboardingDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/hiring-manager/purchase-orders"
+              element={
+                <PrivateRoute>
+                  <ViewPurchaseOrders />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/hiring-manager/create-po"
+              element={
+                <PrivateRoute>
+                  <CreatePurchaseOrder />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/hiring-manager/agencies"
+              element={
+                <PrivateRoute>
+                  <AgencyInvites />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/hiring-manager/resume/:id"
+              element={
+                <PrivateRoute>
+                  <ResumeDetailPage />
+                </PrivateRoute>
+              }
+            />
+
+            {/* Details Pages */}
             <Route
               path="/hiring-manager/candidate/:id"
               element={
@@ -242,7 +296,6 @@ function App() {
                 </PrivateRoute>
               }
             />
-            
             <Route
               path="/hiring-manager/position/:id"
               element={
@@ -251,28 +304,11 @@ function App() {
                 </PrivateRoute>
               }
             />
-
             <Route
               path="/hiring-manager/schedule"
               element={
                 <PrivateRoute>
                   <InterviewManagementPage />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/hiring-manager/onboarding"
-              element={
-                <PrivateRoute>
-                  <Onboarding />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/hiring-manager/reports"
-              element={
-                <PrivateRoute>
-                  <HiringReports />
                 </PrivateRoute>
               }
             />

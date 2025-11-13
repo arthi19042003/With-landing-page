@@ -84,7 +84,8 @@ const Register = () => {
       <div className="auth-card" style={{ maxWidth: "600px" }}>
         <h2>Candidate Register</h2>
 
-        <form onSubmit={handleSubmit}>
+        {/* --- THIS IS THE FIX --- */}
+        <form onSubmit={handleSubmit} noValidate>
           
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
             <div className="form-group">

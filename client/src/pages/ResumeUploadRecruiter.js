@@ -131,25 +131,25 @@ const ResumeUploadRecruiter = () => {
         <form onSubmit={handleSubmit} className="resume-upload-form" noValidate>
           {/* ✅ FIX 4: Updated form fields to match backend */}
           <div className="form-group">
-            <label htmlFor="firstName">First Name*</label>
+            <label htmlFor="firstName">First Name<span className="mandatory">*</span></label>
             <input id="firstName" type="text" name="firstName" placeholder="Enter candidate's first name" value={form.firstName} onChange={handleChange} className={errors.firstName ? "error" : ""} />
             {errors.firstName && <span className="error-text">{errors.firstName}</span>}
           </div>
           
           <div className="form-group">
-            <label htmlFor="lastName">Last Name*</label>
+            <label htmlFor="lastName">Last Name<span className="mandatory">*</span></label>
             <input id="lastName" type="text" name="lastName" placeholder="Enter candidate's last name" value={form.lastName} onChange={handleChange} className={errors.lastName ? "error" : ""} />
             {errors.lastName && <span className="error-text">{errors.lastName}</span>}
           </div>
 
           <div className="form-group">
-            <label htmlFor="email">Email*</label>
+            <label htmlFor="email">Email<span className="mandatory">*</span></label>
             <input id="email" type="email" name="email" placeholder="Enter candidate email" value={form.email} onChange={handleChange} className={errors.email ? "error" : ""} />
             {errors.email && <span className="error-text">{errors.email}</span>}
           </div>
 
           <div className="form-group">
-            <label htmlFor="phone">Phone*</label>
+            <label htmlFor="phone">Phone<span className="mandatory">*</span></label>
             <input id="phone" type="tel" name="phone" placeholder="Enter phone number" value={form.phone} onChange={handleChange} className={errors.phone ? "error" : ""} />
             {errors.phone && <span className="error-text">{errors.phone}</span>}
           </div>
@@ -160,19 +160,19 @@ const ResumeUploadRecruiter = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="rate">Desired Rate ($/hr)*</label>
+            <label htmlFor="rate">Desired Rate ($/hr)<span className="mandatory">*</span></label>
             <input id="rate" type="number" name="rate" placeholder="Enter rate in $/hr" value={form.rate} onChange={handleChange} className={errors.rate ? "error" : ""} />
             {errors.rate && <span className="error-text">{errors.rate}</span>}
           </div>
 
           <div className="form-group">
-            <label htmlFor="currentLocation">Location (City, State)*</label>
+            <label htmlFor="currentLocation">Location (City, State)<span className="mandatory">*</span></label>
             <input id="currentLocation" type="text" name="currentLocation" placeholder="Enter location" value={form.currentLocation} onChange={handleChange} className={errors.currentLocation ? "error" : ""} />
             {errors.currentLocation && <span className="error-text">{errors.currentLocation}</span>}
           </div>
           
           <div className="form-group">
-            <label htmlFor="availability">Availability (e.g., Immediate)*</label>
+            <label htmlFor="availability">Availability (e.g., Immediate)<span className="mandatory">*</span></label>
             <input id="availability" type="text" name="availability" placeholder="Enter availability" value={form.availability} onChange={handleChange} className={errors.availability ? "error" : ""} />
             {errors.availability && <span className="error-text">{errors.availability}</span>}
           </div>
@@ -199,7 +199,7 @@ const ResumeUploadRecruiter = () => {
 
           {/* --- ✅ NEW: Dropdowns --- */}
           <div className="form-group">
-            <label>Select Position *</label>
+            <label>Select Position <span className="mandatory">*</span></label>
             <select name="positionId" value={form.positionId} onChange={handleChange} required className={errors.positionId ? "error" : ""}>
               <option value="">-- Select a position --</option>
               {positions.map(pos => (
@@ -210,7 +210,7 @@ const ResumeUploadRecruiter = () => {
           </div>
 
           <div className="form-group">
-            <label>Select Hiring Manager (to notify) *</label>
+            <label>Select Hiring Manager (to notify) <span className="mandatory">*</span></label>
             <select name="hiringManagerId" value={form.hiringManagerId} onChange={handleChange} required className={errors.hiringManagerId ? "error" : ""}>
               <option value="">-- Select a manager --</option>
               {managers.map(mgr => (
@@ -225,7 +225,7 @@ const ResumeUploadRecruiter = () => {
 
           <div className="form-group file-upload">
             <label className="file-label" htmlFor="resume">
-              📎 Upload Resume (PDF, DOC, DOCX)*
+              📎 Upload Resume (PDF, DOC, DOCX)<span className="mandatory">*</span>
             </label>
             <input
               id="resume"

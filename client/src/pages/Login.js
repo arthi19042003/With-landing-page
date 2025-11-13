@@ -59,7 +59,8 @@ const Login = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        {/* --- THIS IS THE FIX --- */}
+        <form onSubmit={handleSubmit} noValidate>
           <div className="form-group">
             <label htmlFor="email">Email<span className="mandatory">*</span></label>
             <input

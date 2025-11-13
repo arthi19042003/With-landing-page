@@ -2,10 +2,10 @@
    SMART SUBMISSIONS — RECRUITER RESUME UPLOAD (FINAL)
    ========================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+/* @import for Poppins removed */
 
 .resume-upload-page {
-  font-family: 'Poppins', sans-serif;
+  /* font-family removed */
   background-color: #f9fafc;
   min-height: 100vh;
   display: flex;
@@ -124,4 +124,12 @@
   .resume-upload-title {
     font-size: 1.4rem;
   }
+}
+
+/* --- ADDED --- */
+/* Mandatory Star Style */
+.mandatory {
+  color: #dc2626; /* Red color */
+  font-weight: 700;
+  margin-left: 4px;
 }

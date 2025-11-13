@@ -1,10 +1,11 @@
-// src/pages/InterviewDetails.jsx
+// client/src/pages/InterviewDetails.js
 import React, { useEffect, useState } from "react";
 import { FaStar, FaEdit, FaTrash } from "react-icons/fa";
-import api from "../api";
+import api from "../api/axios"; // ✅ Use your configured axios
 import "./InterviewDetails.css";
 
 function InterviewDetails() {
+  // ✅ 1. Added 'notifyManager' to initial state
   const initialState = {
     candidateFirstName: "",
     candidateLastName: "",
@@ -18,6 +19,7 @@ function InterviewDetails() {
     questionsAsked: "",
     notes: "",
     feedback: "",
+    notifyManager: false, 
   };
 
   const [form, setForm] = useState(initialState);
@@ -41,9 +43,13 @@ function InterviewDetails() {
     fetchInterviews();
   }, []);
 
+  // ✅ 2. Updated handleChange to handle Checkbox input
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const handleStarClick = (val) => {
@@ -79,7 +85,13 @@ function InterviewDetails() {
 
   const handleEdit = (item) => {
     const formattedDate = item.date ? new Date(item.date).toISOString().split("T")[0] : "";
-    setForm({ ...item, date: formattedDate, rating: Number(item.rating || 0) });
+    // ✅ 3. Ensure notifyManager is set during edit
+    setForm({ 
+      ...item, 
+      date: formattedDate, 
+      rating: Number(item.rating || 0),
+      notifyManager: item.notifyManager || false 
+    });
     setEditingId(item._id);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -111,7 +123,6 @@ function InterviewDetails() {
     <div className="page interviewer-bg fade">
       <div className="card form-card">
         <h2 className="form-title">{editingId ? "Update Interview" : "Interviewer Details"}</h2>
-        {/* ❌ Message moved from here */}
 
         <form onSubmit={handleSubmit}>
 
@@ -207,7 +218,21 @@ function InterviewDetails() {
             <textarea name="feedback" value={form.feedback} onChange={handleChange} />
           </div>
 
-          {/* ✅ Message moved here, just above the button */}
+          {/* ✅ 4. New Checkbox for Notify Manager */}
+          <div className="form-field" style={{ flexDirection: "row", alignItems: "center", gap: "10px", marginTop: "15px" }}>
+            <input
+              type="checkbox"
+              name="notifyManager"
+              id="notifyManager"
+              checked={form.notifyManager}
+              onChange={handleChange}
+              style={{ width: "20px", height: "20px", margin: 0, cursor: "pointer" }}
+            />
+            <label htmlFor="notifyManager" style={{ marginBottom: "0", cursor: "pointer", fontSize: "1rem", color: "#333" }}>
+              Notify Manager
+            </label>
+          </div>
+
           {message && <div className="msg-box">{message}</div>}
           
           <button type="submit" className="purple-btn full">
